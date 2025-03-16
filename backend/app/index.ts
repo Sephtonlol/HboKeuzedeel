@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import { Request, Response } from "express";
+import { createRoom } from "./controllers/room.controller";
 
 const app = express();
 const PORT = 3000;
@@ -9,9 +10,8 @@ app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/", function (req: Request, res: Response) {
-  console.log(req.body);
-  res.json("yay");
+app.post("/room", async (req: Request, res: Response) => {
+  createRoom(req, res);
 });
 
 app.listen(PORT, function (err) {
