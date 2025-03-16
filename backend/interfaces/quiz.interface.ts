@@ -1,7 +1,6 @@
 import { ObjectId } from "mongodb";
 
 export interface Quiz {
-  roomNumber: any;
   _id?: ObjectId;
   name: string;
   questions: Question[];
