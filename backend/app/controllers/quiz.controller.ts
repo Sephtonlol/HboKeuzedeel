@@ -3,7 +3,7 @@ import { connectToDatabase } from "../db";
 import { Quiz } from "../../interfaces/quiz.interface";
 import { ObjectId } from "mongodb";
 
-const collection = "quizzes";
+const quizCollection = "quizzes";
 
 export const createQuiz = async (req: Request, res: Response) => {
   const { name, questions } = req.body;
@@ -91,7 +91,7 @@ export const createQuiz = async (req: Request, res: Response) => {
   const quiz: Quiz = { name: name, questions: questions };
 
   try {
-    const result = await db.collection(collection).insertOne(quiz);
+    const result = await db.collection(quizCollection).insertOne(quiz);
     return res.status(201).json({
       message: "Successfully created quiz",
       quizId: result.insertedId,
@@ -103,15 +103,15 @@ export const createQuiz = async (req: Request, res: Response) => {
 };
 
 export const getQuiz = async (req: Request, res: Response) => {
-  const { quizId } = req.query;
+  const { quizId } = req.body;
   try {
     const db = await connectToDatabase();
     if (quizId) {
       if (typeof quizId !== "string" || !ObjectId.isValid(quizId)) {
-        return res.status(404).json({ error: "Invalid quiz ID" });
+        return res.status(404).json({ error: "Invalid quiz Id" });
       }
       const fetchedQuiz = await db
-        .collection<Quiz>(collection)
+        .collection<Quiz>(quizCollection)
         .findOne({ _id: new ObjectId(quizId) });
       if (!fetchedQuiz) {
         return res.json({ error: "Could not find quiz" });
@@ -119,7 +119,7 @@ export const getQuiz = async (req: Request, res: Response) => {
       return res.json(fetchedQuiz);
     }
     const fetchedQuizzes = await db
-      .collection<Quiz>(collection)
+      .collection<Quiz>(quizCollection)
       .find()
       .toArray();
     return res.json(fetchedQuizzes);

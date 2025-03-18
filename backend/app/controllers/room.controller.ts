@@ -2,11 +2,13 @@ import { Request, Response } from "express";
 import { connectToDatabase } from "../db";
 import { Participant, Room } from "../../interfaces/rooms.interface";
 import { ObjectId } from "mongodb";
+import { Quiz } from "../../interfaces/quiz.interface";
 
-const collection = "rooms";
+const roomCollection = "rooms";
+const quizCollection = "quizzes";
 
 export const createRoom = async (req: Request, res: Response) => {
-  const { name, public: _public } = req.query;
+  const { name, quizId, public: _public } = req.body;
 
   if (!name || typeof name !== "string" || name.trim().length === 0) {
     return res
@@ -14,12 +16,36 @@ export const createRoom = async (req: Request, res: Response) => {
       .json({ error: "Name is required and must be a non-empty string." });
   }
 
+  if (!quizId)
+    return res
+      .status(422)
+      .json({ error: "quizId is required to create a room" });
+
+  if (typeof quizId !== "string" || !ObjectId.isValid(quizId)) {
+    return res.status(422).json({ error: "Invalid quiz Id" });
+  }
+
   const db = await connectToDatabase();
-  const rooms = await db.collection(collection).find().toArray();
+
+  const quiz = await db
+    .collection<Quiz>(quizCollection)
+    .findOne({ _id: new ObjectId(quizId) });
+
+  if (!quiz) {
+    return res.status(404).json({ error: "Could not find quiz" });
+  }
+  const typedQuiz: Quiz = {
+    _id: quiz._id,
+    name: quiz.name,
+    questions: quiz.questions,
+  };
+
+  const rooms = await db.collection(roomCollection).find().toArray();
 
   const typedRooms: Room[] = rooms.map((room) => ({
     roomId: room.roomId,
     participants: room.participants,
+    host: room.host,
     public: true,
   }));
 
@@ -28,10 +54,13 @@ export const createRoom = async (req: Request, res: Response) => {
   let roomNumber;
   do {
     roomNumber = Math.floor(Math.random() * 9999);
-  } while (roomNumbers.includes(roomNumber));
+  } while (roomNumbers.includes(roomNumber) || roomNumber < 999);
+
+  const userToken = new ObjectId();
 
   const participant: Participant = {
     name: name as string,
+    token: userToken,
     correctAnswers: 0,
     score: 0,
   };
@@ -39,16 +68,19 @@ export const createRoom = async (req: Request, res: Response) => {
   const newRoom: Room = {
     roomId: roomNumber,
     participants: [participant],
-    public: _public == "true" ? true : false,
+    host: userToken,
+    public: _public,
+    quiz: typedQuiz,
   };
 
   try {
-    await db.collection(collection).insertOne(newRoom);
-    return res.json({
+    await db.collection(roomCollection).insertOne(newRoom);
+    return res.status(201).json({
       message: `Successfully created ${
-        _public === "true" ? "public" : "private"
+        _public === true ? "public" : "private"
       } room`,
-      roomNumber,
+      roomId: roomNumber,
+      token: userToken,
     });
   } catch (error) {
     console.error(error);
@@ -57,19 +89,22 @@ export const createRoom = async (req: Request, res: Response) => {
 };
 
 export const joinRoom = async (req: Request, res: Response) => {
-  const { name, roomId } = req.query;
+  const { name, roomId } = req.body;
 
   if (!name || typeof name !== "string" || name.trim().length === 0)
     return res
       .status(422)
       .json({ error: "Name is required and must be a non-empty string." });
 
-  if (!roomId) return res.status(422).json({ error: "Room is required" });
+  if (!roomId) return res.status(422).json({ error: "RoomId is required" });
+
+  if (typeof roomId !== "number")
+    return res.status(422).json({ error: "RoomId is must be of type number" });
 
   const db = await connectToDatabase();
   const room = await db
-    .collection<Room>(collection)
-    .findOne({ roomId: Number(roomId) });
+    .collection<Room>(roomCollection)
+    .findOne({ roomId: roomId });
 
   if (!room) return res.status(404).json({ error: "Room not found" });
 
@@ -87,18 +122,27 @@ export const joinRoom = async (req: Request, res: Response) => {
   if (room.participants.length >= maxParticipants)
     return res.status(403).json({ error: "Room is full" });
 
-  const newParticipant = { name: String(name), score: 0, correctAnswers: 0 };
+  const participantToken = new ObjectId();
+
+  const newParticipant = {
+    name: name,
+    token: participantToken,
+    score: 0,
+    correctAnswers: 0,
+  };
   room.participants.push(newParticipant);
 
   try {
     await db
-      .collection(collection)
+      .collection(roomCollection)
       .updateOne(
         { roomId: Number(roomId) },
         { $set: { participants: room.participants } }
       );
 
-    res.status(201).json({ message: "Joined room successfully", roomId });
+    res
+      .status(201)
+      .json({ message: "Joined room successfully", roomId, participantToken });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to join room" });
@@ -106,7 +150,7 @@ export const joinRoom = async (req: Request, res: Response) => {
 };
 
 export const getRoom = async (req: Request, res: Response) => {
-  const { roomId } = req.query;
+  const { roomId } = req.body;
 
   try {
     const db = await connectToDatabase();
@@ -118,22 +162,34 @@ export const getRoom = async (req: Request, res: Response) => {
       }
 
       const fetchedRoom = await db
-        .collection<Room>(collection)
+        .collection<Room>(roomCollection)
         .findOne({ roomId: parsedRoomId, public: true });
 
       if (!fetchedRoom) {
         return res.status(404).json({ error: "Room not found or not public" });
       }
 
-      return res.status(200).json(fetchedRoom);
+      const sanitizedRoom = {
+        ...fetchedRoom,
+        participants: fetchedRoom.participants.map(
+          ({ token, ...rest }) => rest
+        ),
+      };
+
+      return res.status(200).json(sanitizedRoom);
     }
 
     const fetchedRooms = await db
-      .collection<Room>(collection)
+      .collection<Room>(roomCollection)
       .find({ public: true })
       .toArray();
 
-    return res.status(200).json(fetchedRooms);
+    const sanitizedRooms = fetchedRooms.map((room) => ({
+      ...room,
+      participants: room.participants.map(({ token, ...rest }) => rest),
+    }));
+
+    return res.status(200).json(sanitizedRooms);
   } catch (error) {
     console.error("Error fetching room:", error);
     return res.status(500).json({ error: "Failed to fetch room" });

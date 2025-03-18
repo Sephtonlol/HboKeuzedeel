@@ -5,12 +5,14 @@ export interface Room {
   _id?: ObjectId;
   roomId: number;
   participants: Participant[];
+  host: ObjectId;
   public: boolean;
   quiz?: Quiz;
 }
 
 export interface Participant {
   name: string;
+  token?: ObjectId;
   score: number;
   correctAnswers: number;
 }
