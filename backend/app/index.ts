@@ -8,7 +8,11 @@ import {
   kickRoom,
 } from "./controllers/room.controller";
 import { createQuiz, getQuiz } from "./controllers/quiz.controller";
-import { progressGame, answerQuestion } from "./controllers/game.controller";
+import {
+  progressGame,
+  answerQuestion,
+  getQuestion,
+} from "./controllers/game.controller";
 
 const app = express();
 const PORT = 3000;
@@ -45,8 +49,12 @@ app.put("/progress", async (req: Request, res: Response) => {
   progressGame(req, res);
 });
 
-app.put("/answer", async (req: Request, res: Response) => {
+app.put("/question", async (req: Request, res: Response) => {
   answerQuestion(req, res);
+});
+
+app.get("/question", async (req: Request, res: Response) => {
+  getQuestion(req, res);
 });
 
 app.listen(PORT, function (err) {
