@@ -1,9 +1,14 @@
 import "dotenv/config";
 import express from "express";
 import { Request, Response } from "express";
-import { createRoom, getRoom, joinRoom } from "./controllers/room.controller";
+import {
+  createRoom,
+  getRoom,
+  joinRoom,
+  kickRoom,
+} from "./controllers/room.controller";
 import { createQuiz, getQuiz } from "./controllers/quiz.controller";
-import { startGame } from "./controllers/game.controller";
+import { progressGame } from "./controllers/game.controller";
 
 const app = express();
 const PORT = 3000;
@@ -24,6 +29,10 @@ app.get("/room", async (req: Request, res: Response) => {
   getRoom(req, res);
 });
 
+app.patch("/room", async (req: Request, res: Response) => {
+  kickRoom(req, res);
+});
+
 app.post("/quiz", async (req: Request, res: Response) => {
   createQuiz(req, res);
 });
@@ -32,8 +41,8 @@ app.get("/quiz", async (req: Request, res: Response) => {
   getQuiz(req, res);
 });
 
-app.put("/startGame", async (req: Request, res: Response) => {
-  startGame(req, res);
+app.put("/game", async (req: Request, res: Response) => {
+  progressGame(req, res);
 });
 
 app.listen(PORT, function (err) {

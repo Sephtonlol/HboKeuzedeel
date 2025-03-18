@@ -93,12 +93,12 @@ export const createQuiz = async (req: Request, res: Response) => {
   try {
     const result = await db.collection(quizCollection).insertOne(quiz);
     return res.status(201).json({
-      message: "Successfully created quiz",
+      message: "Successfully created quiz.",
       quizId: result.insertedId,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to create room" });
+    res.status(500).json({ error: "Failed to create room." });
   }
 };
 
@@ -108,13 +108,13 @@ export const getQuiz = async (req: Request, res: Response) => {
     const db = await connectToDatabase();
     if (quizId) {
       if (typeof quizId !== "string" || !ObjectId.isValid(quizId)) {
-        return res.status(404).json({ error: "Invalid quiz Id" });
+        return res.status(404).json({ error: "Invalid quiz Id." });
       }
       const fetchedQuiz = await db
         .collection<Quiz>(quizCollection)
         .findOne({ _id: new ObjectId(quizId) });
       if (!fetchedQuiz) {
-        return res.json({ error: "Could not find quiz" });
+        return res.json({ error: "Could not find quiz." });
       }
       return res.json(fetchedQuiz);
     }
@@ -125,6 +125,6 @@ export const getQuiz = async (req: Request, res: Response) => {
     return res.json(fetchedQuizzes);
   } catch (error) {
     console.error("Error fetching quiz:", error);
-    return res.status(500).json({ error: "Failed to fetch quiz" });
+    return res.status(500).json({ error: "Failed to fetch quiz." });
   }
 };

@@ -19,10 +19,10 @@ export const createRoom = async (req: Request, res: Response) => {
   if (!quizId)
     return res
       .status(422)
-      .json({ error: "quizId is required to create a room" });
+      .json({ error: "quizId is required to create a room." });
 
   if (typeof quizId !== "string" || !ObjectId.isValid(quizId)) {
-    return res.status(422).json({ error: "Invalid quiz Id" });
+    return res.status(422).json({ error: "Invalid quiz Id." });
   }
 
   const db = await connectToDatabase();
@@ -32,7 +32,7 @@ export const createRoom = async (req: Request, res: Response) => {
     .findOne({ _id: new ObjectId(quizId) });
 
   if (!quiz) {
-    return res.status(404).json({ error: "Could not find quiz" });
+    return res.status(404).json({ error: "Could not find quiz." });
   }
   const typedQuiz: Quiz = {
     _id: quiz._id,
@@ -47,6 +47,7 @@ export const createRoom = async (req: Request, res: Response) => {
     participants: room.participants,
     host: room.host,
     public: true,
+    quizProgression: -1,
   }));
 
   const roomNumbers: number[] = typedRooms.map((doc) => doc.roomId);
@@ -61,7 +62,7 @@ export const createRoom = async (req: Request, res: Response) => {
   const participant: Participant = {
     name: name as string,
     token: userToken,
-    correctAnswers: 0,
+    correctAnswers: -1,
     score: 0,
   };
 
@@ -71,6 +72,7 @@ export const createRoom = async (req: Request, res: Response) => {
     host: userToken,
     public: _public,
     quiz: typedQuiz,
+    quizProgression: -1,
   };
 
   try {
@@ -84,7 +86,7 @@ export const createRoom = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to create room" });
+    res.status(500).json({ error: "Failed to create room." });
   }
 };
 
@@ -96,31 +98,31 @@ export const joinRoom = async (req: Request, res: Response) => {
       .status(422)
       .json({ error: "Name is required and must be a non-empty string." });
 
-  if (!roomId) return res.status(422).json({ error: "RoomId is required" });
+  if (!roomId) return res.status(422).json({ error: "RoomId is required." });
 
   if (typeof roomId !== "number")
-    return res.status(422).json({ error: "RoomId is must be of type number" });
+    return res.status(422).json({ error: "RoomId is must be of type number." });
 
   const db = await connectToDatabase();
   const room = await db
     .collection<Room>(roomCollection)
     .findOne({ roomId: roomId });
 
-  if (!room) return res.status(404).json({ error: "Room not found" });
+  if (!room) return res.status(404).json({ error: "Room not found." });
 
   if (!room.public)
-    return res.status(403).json({ error: "Room is not public" });
+    return res.status(403).json({ error: "Room is not public." });
 
   for (const participant of room.participants) {
     if (participant.name == name)
       return res
         .status(409)
-        .json({ error: "Name provided already exists in room" });
+        .json({ error: "Name provided already exists in room." });
   }
 
   const maxParticipants = 10; // Example: limit of 10 participants per room TODO
   if (room.participants.length >= maxParticipants)
-    return res.status(403).json({ error: "Room is full" });
+    return res.status(403).json({ error: "Room is full." });
 
   const participantToken = new ObjectId();
 
@@ -128,7 +130,7 @@ export const joinRoom = async (req: Request, res: Response) => {
     name: name,
     token: participantToken,
     score: 0,
-    correctAnswers: 0,
+    correctAnswers: -1,
   };
   room.participants.push(newParticipant);
 
@@ -142,10 +144,10 @@ export const joinRoom = async (req: Request, res: Response) => {
 
     res
       .status(201)
-      .json({ message: "Joined room successfully", roomId, participantToken });
+      .json({ message: "Joined room successfully.", roomId, participantToken });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to join room" });
+    res.status(500).json({ error: "Failed to join room." });
   }
 };
 
@@ -158,7 +160,7 @@ export const getRoom = async (req: Request, res: Response) => {
     if (roomId) {
       const parsedRoomId = parseInt(roomId as string, 10);
       if (isNaN(parsedRoomId)) {
-        return res.status(400).json({ error: "Invalid room ID format" });
+        return res.status(422).json({ error: "Invalid room ID format." });
       }
 
       const fetchedRoom = await db
@@ -166,7 +168,7 @@ export const getRoom = async (req: Request, res: Response) => {
         .findOne({ roomId: parsedRoomId, public: true });
 
       if (!fetchedRoom) {
-        return res.status(404).json({ error: "Room not found or not public" });
+        return res.status(404).json({ error: "Room not found or not public." });
       }
 
       const sanitizedRoom = {
@@ -192,6 +194,58 @@ export const getRoom = async (req: Request, res: Response) => {
     return res.status(200).json(sanitizedRooms);
   } catch (error) {
     console.error("Error fetching room:", error);
-    return res.status(500).json({ error: "Failed to fetch room" });
+    return res.status(500).json({ error: "Failed to fetch room." });
+  }
+};
+
+export const kickRoom = async (req: Request, res: Response) => {
+  const { token, kick, roomId } = req.body;
+
+  const db = await connectToDatabase();
+  const room = await db.collection(roomCollection).findOne({ roomId: roomId });
+  if (!room) return res.status(404).json({ error: "Room not found." });
+  if (token == room.host.toString()) {
+    if (!kick) {
+      try {
+        await db.collection(roomCollection).deleteOne({ roomId: roomId });
+        return res.status(200).json({ error: "Successfully deleted room" });
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Failed to delete room" });
+      }
+    }
+    try {
+      const updatedParticipants = room.participants.filter(
+        (participant: Participant) => participant.name !== kick
+      );
+
+      if (updatedParticipants.length === room.participants.length) {
+        return res
+          .status(404)
+          .json({ error: "Participant not found or already removed." });
+      }
+      res
+        .status(200)
+        .json({ message: `Participant '${kick}' removed successfully.` });
+
+      if (updatedParticipants.length === room.participants.length) {
+        return res
+          .status(404)
+          .json({ error: "Participant not found or already removed." });
+      }
+
+      await db
+        .collection(roomCollection)
+        .updateOne({ roomId }, { $set: { participants: updatedParticipants } });
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(500)
+        .json({ error: `Failed to kick ${kick} from room` });
+    }
+  } else {
+    return res
+      .status(403)
+      .json({ error: "Only the host can delete the room." });
   }
 };

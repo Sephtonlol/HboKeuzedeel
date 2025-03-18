@@ -8,6 +8,7 @@ export interface Room {
   host: ObjectId;
   public: boolean;
   quiz?: Quiz;
+  quizProgression: number;
 }
 
 export interface Participant {
