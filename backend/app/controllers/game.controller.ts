@@ -47,3 +47,4 @@ export const progressGame = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to start the game." });
   }
 };
+export const answerQuestion = async (req: Request, res: Response) => {};
