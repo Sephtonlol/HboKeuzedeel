@@ -62,8 +62,9 @@ export const createRoom = async (req: Request, res: Response) => {
   const participant: Participant = {
     name: name as string,
     token: userToken,
-    correctAnswers: -1,
     score: 0,
+    correctAnswers: -1,
+    answers: -1,
   };
 
   const newRoom: Room = {
@@ -131,6 +132,7 @@ export const joinRoom = async (req: Request, res: Response) => {
     token: participantToken,
     score: 0,
     correctAnswers: -1,
+    answers: -1,
   };
   room.participants.push(newParticipant);
 
@@ -173,6 +175,7 @@ export const getRoom = async (req: Request, res: Response) => {
 
       const sanitizedRoom = {
         ...fetchedRoom,
+        host: undefined,
         participants: fetchedRoom.participants.map(
           ({ token, ...rest }) => rest
         ),
@@ -188,6 +191,7 @@ export const getRoom = async (req: Request, res: Response) => {
 
     const sanitizedRooms = fetchedRooms.map((room) => ({
       ...room,
+      host: undefined,
       participants: room.participants.map(({ token, ...rest }) => rest),
     }));
 

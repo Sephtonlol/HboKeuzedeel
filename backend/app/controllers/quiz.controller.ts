@@ -104,6 +104,7 @@ export const createQuiz = async (req: Request, res: Response) => {
 
 export const getQuiz = async (req: Request, res: Response) => {
   const { quizId } = req.body;
+
   try {
     const db = await connectToDatabase();
     if (quizId) {
@@ -113,16 +114,48 @@ export const getQuiz = async (req: Request, res: Response) => {
       const fetchedQuiz = await db
         .collection<Quiz>(quizCollection)
         .findOne({ _id: new ObjectId(quizId) });
+
       if (!fetchedQuiz) {
         return res.json({ error: "Could not find quiz." });
       }
-      return res.json(fetchedQuiz);
+
+      const sanitizedQuiz = {
+        ...fetchedQuiz,
+        questions: fetchedQuiz.questions.map((question) => ({
+          ...question,
+          answers: (() => {
+            if ("correctAnswer" in question.answers) {
+              const { correctAnswer, ...rest } = question.answers;
+              return rest;
+            }
+            return question.answers;
+          })(),
+        })),
+      };
+
+      return res.json(sanitizedQuiz);
     }
+
     const fetchedQuizzes = await db
       .collection<Quiz>(quizCollection)
       .find()
       .toArray();
-    return res.json(fetchedQuizzes);
+
+    const sanitizedQuizzes = fetchedQuizzes.map((quiz) => ({
+      ...quiz,
+      questions: quiz.questions.map((question) => ({
+        ...question,
+        answers: (() => {
+          if ("correctAnswer" in question.answers) {
+            const { correctAnswer, ...rest } = question.answers;
+            return rest;
+          }
+          return question.answers;
+        })(),
+      })),
+    }));
+
+    return res.json(sanitizedQuizzes);
   } catch (error) {
     console.error("Error fetching quiz:", error);
     return res.status(500).json({ error: "Failed to fetch quiz." });
