@@ -63,8 +63,8 @@ export const createRoom = async (req: Request, res: Response) => {
     name: name as string,
     token: userToken,
     score: 0,
-    correctAnswers: -1,
-    answers: -1,
+    correctAnswers: 0,
+    answers: 0,
   };
 
   const newRoom: Room = {
@@ -131,8 +131,8 @@ export const joinRoom = async (req: Request, res: Response) => {
     name: name,
     token: participantToken,
     score: 0,
-    correctAnswers: -1,
-    answers: -1,
+    correctAnswers: 0,
+    answers: 0,
   };
   room.participants.push(newParticipant);
 
