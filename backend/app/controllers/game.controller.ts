@@ -38,8 +38,14 @@ export const progressGame = async (req: Request, res: Response) => {
 
   const totalQuestions = room.quiz.questions.length;
 
-  if (room.quizProgression >= totalQuestions) {
-    return res.status(200).json({ message: "Quiz has ended." });
+  const sortedParticipants = room.participants.sort(
+    (a: Participant, b: Participant) => b.score - a.score
+  );
+
+  if (room.quizProgression >= totalQuestions - 1) {
+    return res
+      .status(200)
+      .json({ message: "Quiz has ended.", scores: sortedParticipants });
   }
 
   try {
@@ -80,7 +86,7 @@ export const answerQuestion = async (req: Request, res: Response) => {
 
   if (participant.answers >= room.quizProgression) {
     return res.status(422).json({
-      error: "You have already answered enough questions, unable to proceed.",
+      error: "You have already answered enough questions.",
     });
   }
   try {
@@ -137,7 +143,12 @@ export const getQuestion = async (req: Request, res: Response) => {
   if (!participant) return res.status(422).json({ error: "Token is invalid." });
 
   if (!room.quiz?.questions[room.quizProgression]) {
-    return res.status(404).json({ error: "Question not found." });
+    const sortedParticipants = room.participants.sort(
+      (a: Participant, b: Participant) => b.score - a.score
+    );
+    return res
+      .status(200)
+      .json({ message: "Quiz has ended.", scores: sortedParticipants });
   }
   const { correctAnswer, ...filteredAnswers } =
     room.quiz.questions[room.quizProgression].answers ?? {};

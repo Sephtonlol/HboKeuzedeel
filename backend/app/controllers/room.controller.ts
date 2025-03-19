@@ -173,12 +173,14 @@ export const getRoom = async (req: Request, res: Response) => {
         return res.status(404).json({ error: "Room not found or not public." });
       }
 
+      const sortedParticipants = fetchedRoom.participants.sort(
+        (a: Participant, b: Participant) => b.score - a.score
+      );
+
       const sanitizedRoom = {
         ...fetchedRoom,
         host: undefined,
-        participants: fetchedRoom.participants.map(
-          ({ token, ...rest }) => rest
-        ),
+        participants: sortedParticipants.map(({ token, ...rest }) => rest),
       };
 
       return res.status(200).json(sanitizedRoom);
@@ -189,11 +191,17 @@ export const getRoom = async (req: Request, res: Response) => {
       .find({ public: true })
       .toArray();
 
-    const sanitizedRooms = fetchedRooms.map((room) => ({
-      ...room,
-      host: undefined,
-      participants: room.participants.map(({ token, ...rest }) => rest),
-    }));
+    const sanitizedRooms = fetchedRooms.map((room) => {
+      const sortedParticipants = room.participants.sort(
+        (a: Participant, b: Participant) => b.score - a.score
+      );
+
+      return {
+        ...room,
+        host: undefined,
+        participants: sortedParticipants.map(({ token, ...rest }) => rest),
+      };
+    });
 
     return res.status(200).json(sanitizedRooms);
   } catch (error) {
