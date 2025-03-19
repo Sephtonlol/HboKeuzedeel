@@ -1,15 +1,13 @@
 import { Routes } from '@angular/router';
+import { HomeComponent } from './pages/home/home.component';
+import { RoomComponent } from './pages/room/room.component';
 import { QuizComponent } from './pages/quiz/quiz.component';
-import { HomeComponent } from './pages/menu/home/home.component';
-import { HostComponent } from './pages/menu/host/host.component';
-import { JoinComponent } from './pages/menu/join/join.component';
-import { SoloComponent } from './pages/menu/solo/solo.component';
+import { PlayQuizComponent } from './pages/play-quiz/play-quiz.component';
 
 export const routes: Routes = [
-    { path: 'quiz', component: QuizComponent },
-    { path: 'menu', component: HomeComponent },
-    { path: 'host', component: HostComponent },
-    { path: 'join', component: JoinComponent },
-    { path: 'solo', component: SoloComponent },
-    { path: '', redirectTo: '/menu', pathMatch: 'full' }
+  { path: 'home', component: HomeComponent },
+  { path: 'room', component: RoomComponent },
+  { path: 'quiz', component: QuizComponent },
+  { path: 'play', component: PlayQuizComponent },
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
 ];

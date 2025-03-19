@@ -1,0 +1,39 @@
+<h1 class="title">Quizzy</h1>
+<div class="container">
+  @if(createRoom == null){
+
+  <button class="main-button" mat-flat-button (click)="createRoom = true">
+    <h1>Create room</h1>
+  </button>
+  <button class="main-button" mat-flat-button (click)="createRoom = false">
+    <h1>Join room</h1>
+  </button>
+
+  } @else {
+  <div class="form-container">
+    <div class="input-container">
+      <mat-form-field class="example-full-width" appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput [(ngModel)]="name" />
+      </mat-form-field>
+      @if(createRoom){
+      <mat-slide-toggle [(ngModel)]="isPublic"
+        >Set room as public
+      </mat-slide-toggle>
+      } @if(!createRoom) {
+      <mat-form-field class="example-full-width" appearance="outline">
+        <mat-label>Room code</mat-label>
+        <input matInput [(ngModel)]="roomId" />
+      </mat-form-field>
+      }
+    </div>
+    <div class="submit-container">
+      <button mat-flat-button (click)="createRoom = null">
+        <h1>Cancel</h1></button
+      ><button mat-flat-button (click)="handleRoomAction()">
+        <h1>@if(createRoom){ Create}@else{Join}</h1>
+      </button>
+    </div>
+  </div>
+  }
+</div>

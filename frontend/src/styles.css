@@ -1,1 +1,45 @@
 /* You can add global styles to this file, and also import other style files */
+@font-face {
+  font-family: condensed;
+  src: url(./app/fonts/condensed.ttf);
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+span,
+p {
+  margin: 0.2rem;
+  font-family: condensed;
+  font-weight: bold;
+}
+span {
+  opacity: 0.8;
+}
+mat-slide-toggle {
+  span {
+    margin: 0;
+  }
+}
+
+p {
+  font-weight: normal;
+  margin: 0rem;
+}
+:root {
+  --accent-color: #00d0d0;
+  --line-color: #889392;
+  --primary-color: #101414;
+  --secondary-color: #004f4f;
+  --white-color: #f1f1f1;
+}
+html,
+body {
+  height: 100%;
+}
+body {
+  background-color: var(--primary-color);
+  margin: 0px;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
