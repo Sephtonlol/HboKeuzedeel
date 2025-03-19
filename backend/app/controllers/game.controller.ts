@@ -38,9 +38,9 @@ export const progressGame = async (req: Request, res: Response) => {
 
   const totalQuestions = room.quiz.questions.length;
 
-  const sortedParticipants = room.participants.sort(
-    (a: Participant, b: Participant) => b.score - a.score
-  );
+  const sortedParticipants = room.participants
+    .sort((a: Participant, b: Participant) => b.score - a.score)
+    .map(({ token, ...rest }) => rest);
 
   if (room.quizProgression >= totalQuestions - 1) {
     return res
@@ -85,8 +85,10 @@ export const answerQuestion = async (req: Request, res: Response) => {
   if (!participant) return res.status(422).json({ error: "Token is invalid." });
 
   if (participant.answers >= room.quizProgression) {
+    if (room.quizProgression == -1)
+      return res.status(422).json({ error: "Quiz hasn't started yet." });
     return res.status(422).json({
-      error: "You have already answered enough questions.",
+      error: "You have already answered the question.",
     });
   }
   try {
@@ -143,9 +145,11 @@ export const getQuestion = async (req: Request, res: Response) => {
   if (!participant) return res.status(422).json({ error: "Token is invalid." });
 
   if (!room.quiz?.questions[room.quizProgression]) {
-    const sortedParticipants = room.participants.sort(
-      (a: Participant, b: Participant) => b.score - a.score
-    );
+    if (room.quizProgression == -1)
+      return res.status(422).json({ error: "Quiz hasn't started yet." });
+    const sortedParticipants = room.participants
+      .sort((a: Participant, b: Participant) => b.score - a.score)
+      .map(({ token, ...rest }) => rest);
     return res
       .status(200)
       .json({ message: "Quiz has ended.", scores: sortedParticipants });
