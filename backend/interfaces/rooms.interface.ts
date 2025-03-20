@@ -17,4 +17,5 @@ export interface Participant {
   score: number;
   correctAnswers: number;
   answers: number;
+  team?: number;
 }

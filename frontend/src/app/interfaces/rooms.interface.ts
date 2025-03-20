@@ -1,5 +1,5 @@
-import { ObjectId } from "mongodb";
-import { Quiz } from "./quiz.interface";
+import { ObjectId } from 'mongodb';
+import { Quiz } from './quiz.interface';
 
 export interface Room {
   _id?: ObjectId;
@@ -16,4 +16,5 @@ export interface Participant {
   token?: ObjectId;
   score: number;
   correctAnswers: number;
+  team?: number;
 }
