@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import { Request, Response } from "express";
+import cors from "cors";
 import {
   createRoom,
   getRoom,
@@ -17,8 +18,15 @@ import {
 const app = express();
 const PORT = 3000;
 
-app.use(express.json());
+console.log(process.env.appBaseUrl);
 
+app.use(
+  cors({
+    origin: process.env.appBaseUrl, // Frontend
+  })
+);
+
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.post("/room", async (req: Request, res: Response) => {
