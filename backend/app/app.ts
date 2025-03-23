@@ -2,9 +2,12 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import router from "./routes/app.routes";
+import { checkEnvVars } from "./utils/env.utils";
 
 const PORT = process.env.APP_PORT;
 const app = express();
+
+checkEnvVars(true);
 
 app.use(
   cors({

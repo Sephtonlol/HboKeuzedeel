@@ -1,10 +1,5 @@
 import { Router, Request, Response } from "express";
-import {
-  createRoom,
-  getRoom,
-  joinRoom,
-  kickRoom,
-} from "../controllers/room.controller";
+import { getRoom } from "../controllers/room.controller";
 import { createQuiz, getQuiz } from "../controllers/quiz.controller";
 import {
   answerQuestion,
@@ -14,20 +9,8 @@ import {
 
 const router = Router();
 
-router.post("/room", (req: Request, res: Response) => {
-  createRoom(req, res);
-});
-
-router.put("/room", (req: Request, res: Response) => {
-  joinRoom(req, res);
-});
-
 router.get("/room", (req: Request, res: Response) => {
   getRoom(req, res);
-});
-
-router.patch("/room", (req: Request, res: Response) => {
-  kickRoom(req, res);
 });
 
 router.post("/quiz", (req: Request, res: Response) => {

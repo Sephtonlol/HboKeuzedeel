@@ -11,5 +11,5 @@ export const connectToDatabase = async (): Promise<Db> => {
   const client = new MongoClient(url);
 
   await client.connect();
-  return (db = client.db("hboKeuzeDeel"));
+  return (db = client.db(process.env.DB_NAME));
 };

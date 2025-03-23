@@ -9,8 +9,8 @@ export const progressGame = async (req: Request, res: Response) => {
 
   if (!roomId) return res.status(422).json({ error: "RoomId is required." });
 
-  if (typeof roomId !== "number")
-    return res.status(422).json({ error: "RoomId is must be of type number." });
+  if (typeof roomId !== "string")
+    return res.status(422).json({ error: "RoomId is must be of type string." });
 
   const db = await connectToDatabase();
   const room = await db
@@ -69,8 +69,8 @@ export const answerQuestion = async (req: Request, res: Response) => {
 
   if (!roomId) return res.status(422).json({ error: "RoomId is required." });
 
-  if (typeof roomId !== "number")
-    return res.status(422).json({ error: "RoomId is must be of type number." });
+  if (typeof roomId !== "string")
+    return res.status(422).json({ error: "RoomId is must be of type string." });
 
   const db = await connectToDatabase();
   const room = await db
@@ -129,8 +129,8 @@ export const getQuestion = async (req: Request, res: Response) => {
 
   if (!roomId) return res.status(422).json({ error: "RoomId is required." });
 
-  if (typeof roomId !== "number")
-    return res.status(422).json({ error: "RoomId is must be of type number." });
+  if (typeof roomId !== "string")
+    return res.status(422).json({ error: "RoomId is must be of type string." });
 
   const db = await connectToDatabase();
   const room = await db

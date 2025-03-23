@@ -3,7 +3,7 @@ import { Quiz } from "./quiz.interface";
 
 export interface Room {
   _id?: ObjectId;
-  roomId: number;
+  roomId: string;
   participants: Participant[];
   host: ObjectId;
   public: boolean;
