@@ -2,13 +2,15 @@ import { Request, Response } from "express";
 import { connectToDatabase } from "../db";
 import { Quiz } from "../../interfaces/quiz.interface";
 import { ObjectId } from "mongodb";
+import { checkObjectId, checkString } from "../utils/types.utils";
+import { sanitizeQuiz, sanitizeQuizzes } from "../utils/sanitize.utils";
 
 const quizCollection = "quizzes";
 
 export const createQuiz = async (req: Request, res: Response) => {
   const { name, questions } = req.body;
 
-  if (!name || typeof name !== "string" || name.trim().length === 0)
+  if (checkString(name))
     return res
       .status(422)
       .json({ error: "Quiz name is required and must be a non-empty string." });
@@ -21,7 +23,7 @@ export const createQuiz = async (req: Request, res: Response) => {
   for (const [index, question] of questions.entries()) {
     const { name, type, answers } = question;
 
-    if (!name || typeof name !== "string" || name.trim().length === 0)
+    if (checkString(name))
       return res.status(422).json({
         error: `Question ${
           index + 1
@@ -108,30 +110,18 @@ export const getQuiz = async (req: Request, res: Response) => {
   try {
     const db = await connectToDatabase();
     if (quizId) {
-      if (typeof quizId !== "string" || !ObjectId.isValid(quizId)) {
-        return res.status(404).json({ error: "Invalid quiz Id." });
+      if (checkObjectId(quizId)) {
+        return res.status(404).json({ error: "Invalid quizId." });
       }
       const fetchedQuiz = await db
         .collection<Quiz>(quizCollection)
-        .findOne({ _id: new ObjectId(quizId) });
+        .findOne({ _id: new ObjectId(quizId as string) });
 
       if (!fetchedQuiz) {
         return res.json({ error: "Could not find quiz." });
       }
 
-      const sanitizedQuiz = {
-        ...fetchedQuiz,
-        questions: fetchedQuiz.questions.map((question) => ({
-          ...question,
-          answers: (() => {
-            if ("correctAnswer" in question.answers) {
-              const { correctAnswer, ...rest } = question.answers;
-              return rest;
-            }
-            return question.answers;
-          })(),
-        })),
-      };
+      const sanitizedQuiz = sanitizeQuiz(fetchedQuiz);
 
       return res.json(sanitizedQuiz);
     }
@@ -141,19 +131,7 @@ export const getQuiz = async (req: Request, res: Response) => {
       .find()
       .toArray();
 
-    const sanitizedQuizzes = fetchedQuizzes.map((quiz) => ({
-      ...quiz,
-      questions: quiz.questions.map((question) => ({
-        ...question,
-        answers: (() => {
-          if ("correctAnswer" in question.answers) {
-            const { correctAnswer, ...rest } = question.answers;
-            return rest;
-          }
-          return question.answers;
-        })(),
-      })),
-    }));
+    const sanitizedQuizzes = sanitizeQuizzes(fetchedQuizzes);
 
     return res.json(sanitizedQuizzes);
   } catch (error) {

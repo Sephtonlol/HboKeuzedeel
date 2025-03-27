@@ -6,10 +6,11 @@ if (!url) throw new Error("Connection string is undefined");
 
 let db: Db | null = null;
 
-export const connectToDatabase = async (): Promise<Db> => {
+export const connectToDatabase = async (
+  connectionStr: string | null = null
+): Promise<Db> => {
   if (db) return db;
   const client = new MongoClient(url);
-
   await client.connect();
-  return (db = client.db(process.env.DB_NAME));
+  return (db = client.db(connectionStr ?? process.env.DB_NAME));
 };

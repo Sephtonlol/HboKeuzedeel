@@ -1,12 +1,12 @@
 import { Socket } from "socket.io";
 import { ObjectId } from "mongodb";
 import { connectToDatabase } from "../db";
-import { Room, Participant } from "../../interfaces/rooms.interface";
+import { Room, Participant } from "../../interfaces/room.interface";
 import { Quiz } from "../../interfaces/quiz.interface";
 import Rand from "rand-seed";
-import { compareString } from "../utils/comparisons.utils";
+import { compare } from "../utils/comparisons.utils";
 import { checkObjectId, checkRoomId, checkString } from "../utils/types.utils";
-import { sanitizeRoom } from "../utils/sanitize.utils";
+import { sanitizeQuiz, sanitizeRoom } from "../utils/sanitize.utils";
 
 const quizCollection = "quizzes";
 const roomCollection = "rooms";
@@ -63,7 +63,8 @@ export const create = async (
       token: userToken,
       score: 0,
       correctAnswers: 0,
-      answers: 0,
+      totalAnswers: 0,
+      answers: [],
     };
 
     const newRoom: Room = {
@@ -72,7 +73,7 @@ export const create = async (
       host: userToken,
       public: _public,
       quiz: typedQuiz,
-      quizProgression: -1,
+      quizProgression: 0,
     };
 
     await db.collection(roomCollection).insertOne(newRoom);
@@ -86,7 +87,7 @@ export const create = async (
     });
   } catch (error) {
     console.error(error);
-    socket.emit("user:error", { error: "Failed to create room." });
+    return socket.emit("user:error", { error: "Failed to create room." });
   }
 };
 
@@ -114,6 +115,11 @@ export const join = async (
   if (!room.public)
     return socket.emit("user:error", { error: "Room is not public." });
 
+  if (room.quizProgression > 0)
+    return socket.emit("user:error", {
+      error: "Room has already started the quiz.",
+    });
+
   for (const participant of room.participants) {
     if (participant.name === name) {
       return socket.emit("user:error", {
@@ -133,7 +139,8 @@ export const join = async (
     token: participantToken,
     score: 0,
     correctAnswers: 0,
-    answers: 0,
+    totalAnswers: 0,
+    answers: [],
   };
 
   room.participants.push(newParticipant);
@@ -145,30 +152,93 @@ export const join = async (
 
     socket.join(roomId);
 
-    socket.emit("user:success", {
-      message: "Room joined successfully.",
-      participantToken,
-    });
+    const sanitizedRoom = sanitizeRoom(room);
 
-    sanitizeRoom(room);
+    sanitizedRoom.quiz = sanitizeQuiz(sanitizedRoom.quiz);
+
+    socket.emit("room:join", {
+      message: "Successfully joined the room.",
+      roomId: roomId,
+      token: participantToken,
+    });
 
     socket.to(roomId).emit("room:update", {
-      participants: room.participants,
+      participants: sanitizedRoom.participants,
     });
-    socket.emit("room:update", {
-      participants: room.participants,
+    return socket.emit("room:update", {
+      participants: sanitizedRoom.participants,
     });
   } catch (error) {
     console.error(error);
-    socket.emit("user:error", { error: "Failed to join room." });
+    return socket.emit("user:error", { error: "Failed to join room." });
   }
 };
 
 export const kick = async (
   socket: Socket,
-  data: { token: string; kick: string | undefined; roomId: string }
+  data: { token: string; kick: string; roomId: string }
 ) => {
   const { token, kick, roomId } = data;
+
+  if (!checkObjectId(token))
+    return socket.emit("user:error", {
+      error: "Token is required and must be an objectId.",
+    });
+
+  if (!checkRoomId(roomId))
+    return socket.emit("user:error", {
+      error: `RoomId is required and must be a ${process.env.ROOM_ID_LENGTH}-character long string.`,
+    });
+
+  if (!checkString(kick))
+    return socket.emit("user:error", {
+      error: "Kick is required and must be a non-empty string.",
+    });
+
+  const db = await connectToDatabase();
+  const room = await db.collection<Room>(roomCollection).findOne({ roomId });
+
+  if (!room) return socket.emit("user:error", { error: "Room not found." });
+
+  if (token !== room.host.toString())
+    return socket.emit("user:error", {
+      error: "Only the host can kick participants.",
+    });
+
+  try {
+    const sanitizedRoom = sanitizeRoom(room);
+    const updatedParticipants = sanitizedRoom.participants.filter(
+      (participant: Participant) => !compare(participant.name, kick)
+    );
+
+    if (updatedParticipants.length === room.participants.length)
+      return socket.emit("user:error", {
+        error: "Participant not found or already removed.",
+      });
+
+    await db
+      .collection(roomCollection)
+      .updateOne({ roomId }, { $set: { participants: updatedParticipants } });
+
+    socket.emit("room:kick", {
+      participant: kick,
+    });
+    return socket.to(roomId).emit("room:kick", {
+      participant: kick,
+    });
+  } catch (error) {
+    console.error(error);
+    return socket.emit("user:error", {
+      error: `Failed to kick ${kick} from room.`,
+    });
+  }
+};
+
+export const leave = async (
+  socket: Socket,
+  data: { token: string; roomId: string }
+) => {
+  const { token, roomId } = data;
 
   if (!checkObjectId(token))
     return socket.emit("user:error", {
@@ -185,58 +255,39 @@ export const kick = async (
 
   if (!room) return socket.emit("user:error", { error: "Room not found." });
 
-  if (token === room.host.toString()) {
-    if (!kick) {
-      try {
-        await db.collection(roomCollection).deleteOne({ roomId });
-        socket.emit("user:success", {
-          message: "Successfully deleted room.",
-        });
-      } catch (error) {
-        console.error(error);
-        socket.emit("user:error", { error: "Failed to delete room." });
-      }
-    } else {
-      if (!checkString(kick))
-        return socket.emit("user:error", {
-          error: "Kick is required and must be a non-empty string.",
-        });
+  try {
+    const updatedParticipants = room.participants.filter(
+      (participant: Participant) => participant.token?.toString() !== token
+    );
 
-      try {
-        const updatedParticipants = room.participants.filter(
-          (participant: Participant) => !compareString(participant.name, kick)
-        );
+    if (updatedParticipants.length === room.participants.length)
+      return socket.emit("user:error", {
+        error: "Participant not found or already removed.",
+      });
 
-        if (updatedParticipants.length === room.participants.length)
-          return socket.emit("user:error", {
-            error: "Participant not found or already removed.",
-          });
-
-        await db
-          .collection(roomCollection)
-          .updateOne(
-            { roomId },
-            { $set: { participants: updatedParticipants } }
-          );
-        socket.emit("room:update", {
-          message: `Participant '${kick}' removed successfully.`,
-          participants: updatedParticipants,
-        });
-        return socket.to(roomId).emit("room:update", {
-          message: `Participant '${kick}' removed successfully.`,
-          participants: updatedParticipants,
-        });
-      } catch (error) {
-        console.error(error);
-        socket.emit("user:error", {
-          error: `Failed to kick ${kick} from room.`,
-        });
-      }
+    if (token === room.host.toString()) {
+      // If the host leaves, delete the room
+      await db.collection(roomCollection).deleteOne({ roomId });
+      socket.to(roomId).emit("room:kick", { participant: "all" });
+      return socket.emit("room:kick", { participant: "all" });
     }
-  } else {
-    socket.emit("user:error", {
-      error: "Only the host can use delete or kick.",
+    // Update the room with the participant removed
+    await db
+      .collection(roomCollection)
+      .updateOne({ roomId }, { $set: { participants: updatedParticipants } });
+    socket.to(roomId).emit("room:update", {
+      participants: sanitizeRoom({
+        ...room,
+        participants: updatedParticipants,
+      }).participants,
     });
+    socket.leave(roomId);
+    return socket.emit("user:success", {
+      message: "Successfully left the room.",
+    });
+  } catch (error) {
+    console.error(error);
+    return socket.emit("user:error", { error: "Failed to leave room." });
   }
 };
 
@@ -269,7 +320,15 @@ export const reconnect = async (
     if (!isValidToken)
       return socket.emit("user:error", { error: "Invalid token." });
 
+    const sanitizedRoom = sanitizeRoom(room);
+
+    sanitizedRoom.quiz = sanitizeQuiz(sanitizedRoom.quiz);
+
     socket.join(roomId);
+    return socket.emit("room:update", {
+      message: "Successfully reconnected to room.",
+      participants: sanitizedRoom.participants,
+    });
   } catch (error) {
     return socket.emit("user:error", {
       error: `Failed to reconnect to room ${roomId}.`,

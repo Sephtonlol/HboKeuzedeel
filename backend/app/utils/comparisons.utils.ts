@@ -1,7 +1,7 @@
 const cleanString = (str: string) => str.toLowerCase().replace(/[\s.,]+/g, "");
 
-export const compareString = (str1: string, str2: string): boolean => {
-  if (cleanString(str1) !== cleanString(str2)) {
+export const compare = (str1: any, str2: any): boolean => {
+  if (cleanString(str1.toString()) !== cleanString(str2.toString())) {
     return false;
   }
   return true;
