@@ -7,8 +7,10 @@ export interface Room {
   participants: Participant[];
   host: ObjectId;
   public: boolean;
-  quiz?: Quiz;
   quizProgression: number;
+  locked: boolean;
+  quiz?: Quiz;
+  mode?: 'ffa' | 'team';
 }
 
 export interface Participant {

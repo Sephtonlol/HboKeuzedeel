@@ -1,5 +1,12 @@
 import { Socket, Server } from "socket.io";
-import { create, join, kick, leave, reconnect } from "../sockets/room.socket";
+import {
+  create,
+  join,
+  kick,
+  leave,
+  lock,
+  reconnect,
+} from "../sockets/room.socket";
 import { answerQuestion, progressGame } from "../sockets/game.socket";
 
 export default function socketRoutes(io: Server) {
@@ -20,6 +27,10 @@ export default function socketRoutes(io: Server) {
 
     socket.on("room:leave", async (data) => {
       leave(socket, data);
+    });
+
+    socket.on("room:lock", async (data) => {
+      lock(socket, data);
     });
 
     socket.on("room:reconnect", async (data) => {

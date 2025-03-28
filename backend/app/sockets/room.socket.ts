@@ -74,6 +74,7 @@ export const create = async (
       public: _public,
       quiz: typedQuiz,
       quizProgression: 0,
+      locked: false,
     };
 
     await db.collection(roomCollection).insertOne(newRoom);
@@ -112,8 +113,8 @@ export const join = async (
   const room = await db.collection<Room>(roomCollection).findOne({ roomId });
   if (!room) return socket.emit("user:error", { error: "Room not found." });
 
-  if (!room.public)
-    return socket.emit("user:error", { error: "Room is not public." });
+  if (room.locked)
+    return socket.emit("user:error", { error: "Room has been locked." });
 
   if (room.quizProgression > 0)
     return socket.emit("user:error", {
@@ -127,10 +128,6 @@ export const join = async (
       });
     }
   }
-
-  const maxParticipants = 10; // Example: limit of 10 participants per room
-  if (room.participants.length >= maxParticipants)
-    return socket.emit("user:error", { error: "Room is full." });
 
   const participantToken = new ObjectId();
 
@@ -333,5 +330,43 @@ export const reconnect = async (
     return socket.emit("user:error", {
       error: `Failed to reconnect to room ${roomId}.`,
     });
+  }
+};
+
+export const lock = async (
+  socket: Socket,
+  data: { token: string; roomId: string }
+) => {
+  const { token, roomId } = data;
+
+  if (!checkObjectId(token))
+    return socket.emit("user:error", {
+      error: "Token is required and must be an objectId.",
+    });
+
+  if (!checkRoomId(roomId))
+    return socket.emit("user:error", {
+      error: `RoomId is required and must be a ${process.env.ROOM_ID_LENGTH}-character long string.`,
+    });
+
+  try {
+    const db = await connectToDatabase();
+    const room = await db.collection<Room>(roomCollection).findOne({ roomId });
+
+    if (!room) return socket.emit("user:error", { error: "Room not found." });
+
+    if (token !== room.host.toString())
+      return socket.emit("user:error", {
+        error: "Only the host can lock/unlock the room.",
+      });
+
+    await db
+      .collection(roomCollection)
+      .updateOne({ roomId }, { $set: { locked: !room.locked } });
+    socket.emit("room:lock", { lock: !room.locked });
+    return socket.to(roomId).emit("room:lock", { lock: !room.locked });
+  } catch (error) {
+    console.error(error);
+    return socket.emit("user:error", { error: "Failed to lock/unlock room." });
   }
 };
