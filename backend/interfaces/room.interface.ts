@@ -3,7 +3,7 @@ import { Quiz } from "./quiz.interface";
 
 export interface Room {
   _id?: ObjectId;
-  roomId: number;
+  roomId: string;
   participants: Participant[];
   host: ObjectId;
   public: boolean;
@@ -16,6 +16,7 @@ export interface Participant {
   token?: ObjectId;
   score: number;
   correctAnswers: number;
-  answers: number;
+  totalAnswers: number;
   team?: number;
+  answers: string[];
 }
