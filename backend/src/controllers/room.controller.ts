@@ -39,7 +39,13 @@ export const getRoom = async (req: Request, res: Response) => {
       .find({ public: true })
       .toArray();
 
-    return res.status(200).json(sanitizeRooms(fetchedRooms));
+    const sanitizedRooms = sanitizeRooms(fetchedRooms);
+
+    sanitizedRooms.forEach((room) => {
+      delete room.quiz;
+      delete room.participants;
+    });
+    return res.status(200).json(sanitizedRooms);
   } catch (error) {
     console.error("Error fetching room:", error);
     return res.status(500).json({ error: "Failed to fetch room." });

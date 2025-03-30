@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "concurrently \"nodemon app/app.ts\" \"nodemon app/server.ts\""
+    "dev": "concurrently \"nodemon src/app.ts\" \"nodemon src/server.ts\""
   },
   "author": "",
   "license": "ISC",

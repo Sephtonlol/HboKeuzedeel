@@ -3,7 +3,7 @@ import { Participant, Room } from "../../interfaces/room.interface";
 
 export const sanitizeRooms = (fetchedRooms: Room[]): any[] => {
   return fetchedRooms.map((room) => {
-    const sortedParticipants = room.participants.sort(
+    const sortedParticipants = (room.participants ?? []).sort(
       (a: Participant, b: Participant) => b.score - a.score
     );
 
@@ -16,7 +16,7 @@ export const sanitizeRooms = (fetchedRooms: Room[]): any[] => {
 };
 
 export const sanitizeRoom = (room: Room): any => {
-  const sortedParticipants = room.participants.sort(
+  const sortedParticipants = (room.participants ?? []).sort(
     (a, b) => b.score - a.score
   );
 

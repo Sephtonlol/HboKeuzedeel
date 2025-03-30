@@ -36,9 +36,10 @@ export const progressGame = async (
       error: "No quiz found in this room.",
     });
 
-  const allAnswered = room.participants.every(
-    (p: Participant) => p.totalAnswers >= room.quizProgression - 1 // hope this works
-  );
+  const allAnswered =
+    room.participants?.every(
+      (p: Participant) => p.totalAnswers >= room.quizProgression - 1 // hope this works
+    ) ?? false;
   console.log(room.participants);
   console.log(allAnswered);
 
@@ -100,10 +101,10 @@ export const answerQuestion = async (
 
     if (!room) return socket.emit("user:error", { error: "Room not found." });
 
-    const participant: Participant | undefined = room.participants.find(
+    const participant: Participant | undefined = room.participants?.find(
       (p: Participant) => p.token?.toString() === token
     );
-    if (!participant)
+    if (!room.participants || !participant)
       return socket.emit("user:error", { error: "Participant not found." });
 
     if (participant.totalAnswers > room.quizProgression) {

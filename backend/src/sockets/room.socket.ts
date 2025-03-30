@@ -16,18 +16,51 @@ const characters = process.env.ID_CHARACTERS as string;
 
 export const create = async (
   socket: Socket,
-  data: { name: string; quizId: string; public: boolean; mode: Mode }
+  data: {
+    name: string;
+    roomName: string;
+    quizId: string;
+    public: boolean;
+    mode: Mode;
+  }
 ) => {
-  const { name, quizId, public: _public, mode } = data;
+  const { name, roomName, quizId, public: _public, mode } = data;
 
   if (!checkString(name))
     return socket.emit("user:error", {
       error: "Name is required and must be a non-empty string.",
     });
 
+  if (!checkString(roomName))
+    return socket.emit("user:error", {
+      error: "RoomName is required and must be a non-empty string.",
+    });
+
   if (!checkObjectId(quizId))
     return socket.emit("user:error", {
       error: "QuizId is required and must be an objectId.",
+    });
+
+  if (!mode) return socket.emit("user:error", { error: "Mode is required." });
+
+  if (mode.type !== "team" && mode.type !== "ffa" && mode.type !== "coop") {
+    return socket.emit("user:error", {
+      error: "Mode type must be either 'team', 'ffa', or 'coop'.",
+    });
+  }
+
+  if (
+    mode.type === "team" &&
+    (typeof mode.teams !== "number" || mode.teams < 2)
+  ) {
+    return socket.emit("user:error", {
+      error: "Mode teams must be a number greater than 1.",
+    });
+  }
+
+  if (mode.type !== "team" && mode.teams)
+    return socket.emit("user:error", {
+      error: "Mode teams is only valid for team mode.",
     });
 
   const db = await connectToDatabase();
@@ -69,6 +102,7 @@ export const create = async (
     };
 
     const newRoom: Room = {
+      name: roomName,
       roomId: roomId,
       participants: [participant],
       host: userToken,
@@ -127,6 +161,9 @@ export const join = async (
     return socket.emit("user:error", {
       error: "Team must be of type number.",
     });
+
+  if (!room.participants)
+    return socket.emit("user:error", { error: "Room participants not found." });
 
   for (const participant of room.participants) {
     if (participant.name === name) {
@@ -216,6 +253,11 @@ export const kick = async (
       (participant: Participant) => !compare(participant.name, kick)
     );
 
+    if (!room.participants)
+      return socket.emit("user:error", {
+        error: "Room participants not found.",
+      });
+
     if (updatedParticipants.length === room.participants.length)
       return socket.emit("user:error", {
         error: "Participant not found or already removed.",
@@ -259,6 +301,9 @@ export const leave = async (
   const room = await db.collection<Room>(roomCollection).findOne({ roomId });
 
   if (!room) return socket.emit("user:error", { error: "Room not found." });
+
+  if (!room.participants)
+    return socket.emit("user:error", { error: "Room participants not found." });
 
   try {
     const updatedParticipants = room.participants.filter(
@@ -317,6 +362,11 @@ export const reconnect = async (
     const room = await db.collection<Room>(roomCollection).findOne({ roomId });
 
     if (!room) return socket.emit("user:error", { error: "Room not found." });
+
+    if (!room.participants)
+      return socket.emit("user:error", {
+        error: "Room participants not found.",
+      });
 
     const isValidToken = room.participants.some(
       (participant) => participant.token?.toString() === token

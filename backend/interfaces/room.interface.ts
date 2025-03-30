@@ -2,9 +2,10 @@ import { ObjectId } from "mongodb";
 import { Quiz } from "./quiz.interface";
 
 export interface Room {
+  name: string;
   _id?: ObjectId;
   roomId: string;
-  participants: Participant[];
+  participants?: Participant[];
   host: ObjectId;
   public: boolean;
   quizProgression: number;
