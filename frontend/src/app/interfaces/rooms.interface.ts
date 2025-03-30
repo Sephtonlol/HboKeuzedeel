@@ -10,7 +10,12 @@ export interface Room {
   quizProgression: number;
   locked: boolean;
   quiz?: Quiz;
-  mode?: 'ffa' | 'team';
+  mode?: Mode;
+}
+
+export interface Mode {
+  type: 'ffa' | 'team' | 'coop';
+  teams?: number;
 }
 
 export interface Participant {

@@ -1,7 +1,7 @@
 import { Socket } from "socket.io";
 import { ObjectId } from "mongodb";
 import { connectToDatabase } from "../db";
-import { Room, Participant } from "../../interfaces/room.interface";
+import { Room, Participant, Mode } from "../../interfaces/room.interface";
 import { Quiz } from "../../interfaces/quiz.interface";
 import Rand from "rand-seed";
 import { compare } from "../utils/comparisons.utils";
@@ -16,9 +16,9 @@ const characters = process.env.ID_CHARACTERS as string;
 
 export const create = async (
   socket: Socket,
-  data: { name: string; quizId: string; public: boolean }
+  data: { name: string; quizId: string; public: boolean; mode: Mode }
 ) => {
-  const { name, quizId, public: _public } = data;
+  const { name, quizId, public: _public, mode } = data;
 
   if (!checkString(name))
     return socket.emit("user:error", {
@@ -43,6 +43,7 @@ export const create = async (
     name: quiz.name,
     questions: quiz.questions,
   };
+
   try {
     const rooms = await db.collection("rooms").find().toArray();
     const roomNumbers: string[] = rooms.map((room) => room.roomId);
@@ -75,6 +76,7 @@ export const create = async (
       quiz: typedQuiz,
       quizProgression: 0,
       locked: false,
+      mode: mode,
     };
 
     await db.collection(roomCollection).insertOne(newRoom);
@@ -94,9 +96,9 @@ export const create = async (
 
 export const join = async (
   socket: Socket,
-  data: { name: string; roomId: string }
+  data: { name: string; roomId: string; team?: number }
 ) => {
-  const { name, roomId } = data;
+  const { name, roomId, team } = data;
 
   if (!checkString(name))
     return socket.emit("user:error", {
@@ -121,6 +123,11 @@ export const join = async (
       error: "Room has already started the quiz.",
     });
 
+  if (typeof team !== "number")
+    return socket.emit("user:error", {
+      error: "Team must be of type number.",
+    });
+
   for (const participant of room.participants) {
     if (participant.name === name) {
       return socket.emit("user:error", {
@@ -138,6 +145,7 @@ export const join = async (
     correctAnswers: 0,
     totalAnswers: 0,
     answers: [],
+    ...(room.mode?.type === "team" && { team }),
   };
 
   room.participants.push(newParticipant);
