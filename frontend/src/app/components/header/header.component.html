@@ -2,13 +2,16 @@
   <li class="nav-item">
     <a class="nav-link" aria-current="page" [routerLink]="['/home']">Home</a>
   </li>
+  @if(isLoggedIn){
+
   <li class="nav-item">
-    <a class="nav-link" [routerLink]="['/home']">Create Quiz</a>
+    <a class="nav-link" [routerLink]="['/profile']">Profile</a>
   </li>
-  <li class="nav-item">
-    <a class="nav-link" [routerLink]="['/home']">Profile</a>
-  </li>
+
+  }@else {
   <li class="nav-item">
     <a class="nav-link" [routerLink]="['/login']">Login</a>
   </li>
+
+  }
 </ul>

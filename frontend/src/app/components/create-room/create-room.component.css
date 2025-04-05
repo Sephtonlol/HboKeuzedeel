@@ -3,8 +3,6 @@
   display: block;
   background-color: var(--tertiary-color);
   border-radius: 6px;
-
-  box-shadow: 0px 0px 30px -10px black;
 }
 .-container {
   display: flex;
@@ -13,8 +11,7 @@
 .left {
   background-color: var(--secondary-color);
   border-radius: 6px;
-  padding: 0.75rem;
-  box-shadow: 0px 0px 20px -10px black;
+  padding: 1rem 1.25rem;
 }
 .button-group {
   display: flex;
@@ -31,14 +28,12 @@
   width: 225px;
 }
 .select-quiz-container {
-  box-shadow: 0px 0px 20px -10px black;
-
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   width: 400px;
   align-items: end;
-  padding: 0.75rem;
+  padding: 1rem 1.25rem;
   background-color: var(--secondary-color);
   border-radius: 6px;
 }

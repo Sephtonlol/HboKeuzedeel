@@ -1,17 +1,16 @@
-import { Component } from '@angular/core';
-import { HeaderComponent } from '../../components/header/header.component';
-import { RouterLink } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-register',
-  imports: [HeaderComponent, RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css',
 })
-export class RegisterComponent {
-  constructor(private apiService: ApiService) {}
+export class RegisterComponent implements OnInit {
+  constructor(private apiService: ApiService, private router: Router) {}
   username: string = '';
   email: string = '';
   password: string = '';
@@ -33,5 +32,11 @@ export class RegisterComponent {
     }
     this.error = result.error || '';
     this.success = result.message || '';
+  }
+
+  async ngOnInit() {
+    if (localStorage.getItem('authToken')) {
+      this.router.navigate(['/home']);
+    }
   }
 }
