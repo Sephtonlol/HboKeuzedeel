@@ -8,6 +8,7 @@ export const checkEnvVars = (log: boolean): void => {
     "SEED",
     "ROOM_ID_LENGTH",
     "DB_NAME",
+    "SESSION_SECRET",
   ];
 
   for (const variable of requiredVars) {

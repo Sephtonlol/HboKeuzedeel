@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import session from "express-session";
 import cors from "cors";
 import router from "./routes/app.routes";
 import { checkEnvVars } from "./utils/env.utils";
@@ -12,6 +13,14 @@ checkEnvVars(true);
 app.use(
   cors({
     origin: process.env.APP_BASE_URL, // Frontend rest-api
+  })
+);
+
+app.use(
+  session({
+    secret: "secret123",
+    resave: false,
+    saveUninitialized: false,
   })
 );
 

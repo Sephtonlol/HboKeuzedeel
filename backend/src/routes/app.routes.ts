@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import { getRoom } from "../controllers/room.controller";
 import { createQuiz, getQuiz } from "../controllers/quiz.controller";
+import { login, register, user } from "../controllers/account.controller";
 
 const router = Router();
 
@@ -14,6 +15,18 @@ router.post("/quiz", (req: Request, res: Response) => {
 
 router.get("/quiz", (req: Request, res: Response) => {
   getQuiz(req, res);
+});
+
+router.post("/login", (req: Request, res: Response) => {
+  login(req, res);
+});
+
+router.post("/register", (req: Request, res: Response) => {
+  register(req, res);
+});
+
+router.get("/user", (req: Request, res: Response) => {
+  user(req, res);
 });
 
 export default router;
