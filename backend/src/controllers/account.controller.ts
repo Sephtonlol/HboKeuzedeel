@@ -51,12 +51,12 @@ export const register = async (req: Request, res: Response) => {
 };
 
 export const login = async (req: Request, res: Response) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!checkString(username))
+  if (!checkString(email))
     return res
       .status(422)
-      .json({ error: "Username is required and must be a string." });
+      .json({ error: "Email is required and must be a string." });
 
   if (!checkString(password))
     return res
@@ -68,7 +68,7 @@ export const login = async (req: Request, res: Response) => {
 
     const result = await db
       .collection(userCollection)
-      .findOne({ "user.username": username });
+      .findOne({ "user.email": email });
 
     if (!result) return res.status(404).json({ error: "User not found" });
 
@@ -78,10 +78,7 @@ export const login = async (req: Request, res: Response) => {
     const token = crypto.randomBytes(32).toString("hex");
     await db
       .collection(userCollection)
-      .updateOne(
-        { "user.username": username },
-        { $set: { "user.token": token } }
-      );
+      .updateOne({ "user.username": email }, { $set: { "user.token": token } });
 
     res.json({ message: "Logged in", token });
   } catch (error) {

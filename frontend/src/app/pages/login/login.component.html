@@ -1,0 +1,48 @@
+<div class="-container">
+  <app-header />
+
+  <div class="form">
+    <div class="mb-0">
+      <label for="exampleInputEmail1" class="form-label">
+        <span> Email address </span>
+      </label>
+      <input
+        type="email"
+        class="form-control"
+        id="exampleInputEmail1"
+        aria-describedby="emailHelp"
+        [(ngModel)]="email"
+        #emailInput="ngModel"
+      />@if(!email && emailInput.touched){
+
+      <small class="text-danger">Email is required</small>
+      }
+    </div>
+    <div class="mb-3">
+      <label for="exampleInputPassword1" class="form-label">
+        <span> Password </span>
+      </label>
+      <input
+        type="password"
+        class="form-control"
+        [(ngModel)]="password"
+        #passwordInput="ngModel"
+      />@if(!password && passwordInput.touched){
+
+      <small class="text-danger">Password is required</small>
+      }
+    </div>
+    <button
+      class="btn btn-primary"
+      (click)="login()"
+      [class.disabled]="!email || !password"
+    >
+      Submit
+    </button>
+    <small class="register text-light">
+      Don't have an account? <a [routerLink]="['/register']">SignUp</a>
+    </small>
+    <small class="text-danger">{{ error }}</small>
+    <small class="text-success">{{ success }}</small>
+  </div>
+</div>

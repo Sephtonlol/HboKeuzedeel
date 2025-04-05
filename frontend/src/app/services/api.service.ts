@@ -32,4 +32,40 @@ export class ApiService {
       throw error;
     }
   }
+
+  async login(email: string, password: string): Promise<any> {
+    try {
+      return await firstValueFrom(
+        this.http.post<any>(`${this.apiUrl}/login`, { email, password })
+      );
+    } catch (error: any) {
+      if (error.status >= 400) {
+        return error.error;
+      }
+      console.error('Error during login:', error);
+      throw error;
+    }
+  }
+
+  async register(
+    username: string,
+    email: string,
+    password: string
+  ): Promise<any> {
+    try {
+      return await firstValueFrom(
+        this.http.post<any>(`${this.apiUrl}/register`, {
+          username,
+          email,
+          password,
+        })
+      );
+    } catch (error: any) {
+      if (error.status >= 400) {
+        return error.error;
+      }
+      console.error('Error during signUp:', error);
+      throw error;
+    }
+  }
 }
