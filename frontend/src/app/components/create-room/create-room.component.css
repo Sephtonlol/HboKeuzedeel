@@ -1,0 +1,55 @@
+:host {
+  padding: 1.5rem;
+  display: block;
+  background-color: var(--tertiary-color);
+  border-radius: 6px;
+
+  box-shadow: 0px 0px 30px -10px black;
+}
+.-container {
+  display: flex;
+  justify-content: space-between;
+}
+.left {
+  background-color: var(--secondary-color);
+  border-radius: 6px;
+  padding: 0.75rem;
+  box-shadow: 0px 0px 20px -10px black;
+}
+.button-group {
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  align-items: start;
+  gap: 0.5rem;
+  padding: 0.5rem 0rem 0rem 0rem;
+}
+.room-name {
+  margin: 0px;
+}
+.input-text {
+  width: 225px;
+}
+.select-quiz-container {
+  box-shadow: 0px 0px 20px -10px black;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 400px;
+  align-items: end;
+  padding: 0.75rem;
+  background-color: var(--secondary-color);
+  border-radius: 6px;
+}
+.selected-quiz {
+  display: flex;
+
+  flex-direction: column;
+  width: 100%;
+}
+.quizzes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}

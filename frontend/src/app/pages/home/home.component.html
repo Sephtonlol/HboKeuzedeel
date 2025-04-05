@@ -1,58 +1,7 @@
-<div>
-  <h1 class="title">Quizzy</h1>
-  <div class="create-join">
-    @if(createRoom == null){
-
-    <button class="main-button" mat-flat-button (click)="setCreateJoin(true)">
-      <h1>Create</h1>
-    </button>
-    <button class="main-button" mat-flat-button (click)="setCreateJoin(false)">
-      <h1>Join</h1>
-    </button>
-
-    } @else {
-    <div class="form-container">
-      <div
-        class="input-container"
-        [class.input-container-open]="createRoom || createRoom == false"
-      >
-        <mat-form-field class="example-full-width" appearance="outline">
-          <mat-label>Nickname</mat-label>
-          <input matInput [(ngModel)]="name" />
-        </mat-form-field>
-        @if(createRoom){
-        <mat-slide-toggle [(ngModel)]="isPublic"
-          >Set room as public
-        </mat-slide-toggle>
-        @if(isPublic){
-        <mat-radio-group aria-label="Select room mode" [(ngModel)]="mode">
-          <mat-radio-button value="ffa">Free for all</mat-radio-button>
-          <mat-radio-button value="teams">Teams</mat-radio-button>
-          <mat-radio-button value="coop">Co-op</mat-radio-button>
-        </mat-radio-group>
-        } @else {
-        <div class="placeholder"></div>
-        } } @if(!createRoom) {
-        <mat-form-field class="example-full-width" appearance="outline">
-          <mat-label>Room code</mat-label>
-          <input matInput [(ngModel)]="roomId" />
-        </mat-form-field>
-        }
-      </div>
-      <div class="submit-container">
-        <button mat-flat-button (click)="setCreateJoin(null)">
-          <h1>Cancel</h1></button
-        ><button mat-flat-button (click)="handleRoomAction()">
-          <h1>@if(createRoom){ Create}@else{Join}</h1>
-        </button>
-      </div>
-    </div>
-    }
+<app-header />
+<div class="-container">
+  <div class="content">
+    <app-create-room />
+    <app-rooms />
   </div>
-</div>
-<div
-  class="quizzes-rooms"
-  [class.quizzes-rooms-open]="createRoom || createRoom == false"
->
-  <h1 class="title">yea</h1>
 </div>

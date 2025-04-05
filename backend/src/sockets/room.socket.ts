@@ -4,7 +4,7 @@ import { connectToDatabase } from "../db";
 import { Room, Participant, Mode } from "../../interfaces/room.interface";
 import { Quiz } from "../../interfaces/quiz.interface";
 import Rand from "rand-seed";
-import { compare } from "../utils/comparisons.utils";
+import { cleanString, compare } from "../utils/comparisons.utils";
 import { checkObjectId, checkRoomId, checkString } from "../utils/types.utils";
 import { sanitizeQuiz, sanitizeRoom } from "../utils/sanitize.utils";
 
@@ -144,9 +144,14 @@ export const join = async (
       error: `RoomId is required and must be a ${process.env.ROOM_ID_LENGTH}-character long string.`,
     });
 
+  const cleanRoomId = cleanString(roomId);
+
   const db = await connectToDatabase();
 
-  const room = await db.collection<Room>(roomCollection).findOne({ roomId });
+  const room = await db
+    .collection<Room>(roomCollection)
+    .findOne({ roomId: cleanRoomId });
+
   if (!room) return socket.emit("user:error", { error: "Room not found." });
 
   if (room.locked)
@@ -157,9 +162,9 @@ export const join = async (
       error: "Room has already started the quiz.",
     });
 
-  if (typeof team !== "number")
+  if (team || typeof team !== "number")
     return socket.emit("user:error", {
-      error: "Team must be of type number.",
+      error: "Team is required and must be of type number.",
     });
 
   if (!room.participants)

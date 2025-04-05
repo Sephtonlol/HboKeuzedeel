@@ -1,0 +1,20 @@
+<div class="card-front" [style.backgroundImage]="backgroundStyle">
+  <div
+    class="name"
+    [style.backgroundColor]="randomColor2"
+    [style.boxShadow]="'0px 0px 30px 40px ' + randomColor2"
+  >
+    <h5>
+      {{ room.name }}
+    </h5>
+  </div>
+  <span>{{ room.roomId }}</span>
+</div>
+<div class="card-back" [style.backgroundColor]="randomColor2">
+  <h4>Participants {{ room.participantCount }}</h4>
+  <h4>Host {{ room.hostName }}</h4>
+  <h4>Mode {{ room.mode?.type }}</h4>
+  @if(room.mode?.type == "team"){
+  <h4>Teams {{ room.mode?.teams }}</h4>
+  }
+</div>

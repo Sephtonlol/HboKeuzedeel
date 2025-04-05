@@ -1,1 +1,16 @@
-<p>quiz works!</p>
+<h6>{{ quiz.name }}</h6>
+@if(showQuestions){
+<ul>
+  @for(question of quiz.questions; track question){
+  <li>
+    {{ question.name }}
+  </li>
+  }
+</ul>
+}
+<div class="btn-group">
+  <button class="btn btn-primary" (click)="toggleQuestions()">
+    Toggle Questions
+  </button>
+  <button class="btn btn-primary" (click)="selectQuiz()">Select Quiz</button>
+</div>

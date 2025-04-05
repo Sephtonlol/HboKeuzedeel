@@ -14,6 +14,17 @@ export interface Room {
   mode?: Mode;
 }
 
+export interface SimpleRoom {
+  name: string;
+  _id?: ObjectId;
+  roomId: string;
+  quizProgression: number;
+  locked: boolean;
+  mode?: Mode;
+  hostName: string;
+  participantCount: number;
+}
+
 export interface Mode {
   type: 'ffa' | 'team' | 'coop';
   teams?: number;

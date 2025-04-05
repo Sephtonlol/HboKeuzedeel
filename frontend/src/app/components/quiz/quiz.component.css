@@ -1,0 +1,17 @@
+:host {
+  width: 100%;
+  background-color: var(--secondary-color);
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem;
+  border-radius: 6px;
+  text-align: center;
+  cursor: pointer;
+}
+ul {
+  text-align: left;
+  margin-bottom: 0rem;
+}
+button {
+  margin-top: 0.5rem;
+}

@@ -1,4 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
+
+@import "bootstrap/dist/css/bootstrap.min.css";
+
 @font-face {
   font-family: condensed;
   src: url(./app/fonts/condensed.ttf);
@@ -8,14 +11,13 @@ h2,
 h3,
 h4,
 h5,
+h6,
 span,
 p {
   margin: 0.2rem;
   font-family: condensed;
   font-weight: bold;
-}
-span {
-  opacity: 0.8;
+  color: var(--white-color);
 }
 mat-slide-toggle {
   span {
@@ -30,9 +32,11 @@ p {
 :root {
   --accent-color: #00d0d0;
   --line-color: #889392;
-  --primary-color: #101414;
-  --secondary-color: #004f4f;
-  --white-color: #f1f1f1;
+  --primary-color: #191923;
+  --secondary-color: #1e1e28;
+  --tertiary-color: #20202a;
+  --gray-color: #dfdfdf;
+  --white-color: #eeeeee;
 }
 html,
 body {

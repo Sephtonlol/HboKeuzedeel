@@ -42,9 +42,23 @@ export const getRoom = async (req: Request, res: Response) => {
     const sanitizedRooms = sanitizeRooms(fetchedRooms);
 
     sanitizedRooms.forEach((room) => {
+      const hostParticipant = room.participants?.find(
+        (participant: { token: string; name: string }) =>
+          participant.token === room.host
+      );
+      if (hostParticipant) {
+        room.hostName = hostParticipant.name;
+      }
+    });
+
+    sanitizedRooms.forEach((room) => {
       delete room.quiz;
       delete room.participants;
     });
+    sanitizedRooms.forEach((room, index) => {
+      room.participantCount = fetchedRooms[index].participants?.length || 0;
+    });
+
     return res.status(200).json(sanitizedRooms);
   } catch (error) {
     console.error("Error fetching room:", error);

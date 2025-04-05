@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { Room } from '../interfaces/rooms.interface';
+import { SimpleRoom } from '../interfaces/rooms.interface';
 import { firstValueFrom } from 'rxjs';
 import { Quiz } from '../interfaces/quiz.interface';
 
@@ -13,9 +13,11 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
-  async getRooms(): Promise<Room[]> {
+  async getRooms(): Promise<SimpleRoom[]> {
     try {
-      return await firstValueFrom(this.http.get<Room[]>(`${this.apiUrl}/room`));
+      return await firstValueFrom(
+        this.http.get<SimpleRoom[]>(`${this.apiUrl}/room`)
+      );
     } catch (error) {
       console.error('Error fetching rooms:', error);
       throw error;

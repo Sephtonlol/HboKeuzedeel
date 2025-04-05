@@ -38,7 +38,7 @@ export const progressGame = async (
 
   const allAnswered =
     room.participants?.every(
-      (p: Participant) => p.totalAnswers >= room.quizProgression - 1 // hope this works
+      (p: Participant) => p.totalAnswers >= room.quizProgression - 1
     ) ?? false;
   console.log(room.participants);
   console.log(allAnswered);
@@ -129,7 +129,7 @@ export const answerQuestion = async (
 
     if (isCorrect) {
       participant.correctAnswers += 1;
-      participant.score += 5; // MAKE IT SO WHEN CREATING A QUIZ YOU CAN CHOOSE HOW MUCH A QUESTION IS WORTH TODO
+      participant.score += 5;
     }
     await db
       .collection<Room>("rooms")

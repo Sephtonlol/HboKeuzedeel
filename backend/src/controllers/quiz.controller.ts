@@ -10,7 +10,7 @@ const quizCollection = "quizzes";
 export const createQuiz = async (req: Request, res: Response) => {
   const { name, questions } = req.body;
 
-  if (checkString(name))
+  if (!checkString(name))
     return res
       .status(422)
       .json({ error: "Quiz name is required and must be a non-empty string." });
@@ -23,7 +23,7 @@ export const createQuiz = async (req: Request, res: Response) => {
   for (const [index, question] of questions.entries()) {
     const { name, type, answers } = question;
 
-    if (checkString(name))
+    if (!checkString(name))
       return res.status(422).json({
         error: `Question ${
           index + 1
@@ -110,7 +110,7 @@ export const getQuiz = async (req: Request, res: Response) => {
   try {
     const db = await connectToDatabase();
     if (quizId) {
-      if (checkObjectId(quizId)) {
+      if (!checkObjectId(quizId)) {
         return res.status(404).json({ error: "Invalid quizId." });
       }
       const fetchedQuiz = await db

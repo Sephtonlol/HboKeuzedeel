@@ -12,6 +12,7 @@ export interface Room {
   locked: boolean;
   quiz?: Quiz;
   mode?: Mode;
+  hostName?: string;
 }
 
 export interface Mode {
