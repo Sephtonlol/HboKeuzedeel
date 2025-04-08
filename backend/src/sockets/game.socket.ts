@@ -7,7 +7,7 @@ import { sanitizeQuiz, sanitizeRoom } from "../utils/sanitize.utils";
 
 const roomCollection = "rooms";
 
-export const progressGame = async (
+export const showAnswers = async (
   socket: Socket,
   data: { token: string; roomId: string }
 ) => {
@@ -31,6 +31,76 @@ export const progressGame = async (
       error: "Only the host can start the game.",
     });
 
+  if (!room.quiz || !room.quiz.questions) {
+    return socket.emit("user:error", { error: "No quiz found in this room." });
+  }
+
+  if (
+    room.quizProgression <= 0 ||
+    room.quizProgression > room.quiz.questions.length
+  )
+    return socket.emit("user:error", { error: "Invalid question index." });
+
+  return socket.emit("quiz:answer", {
+    lastQuestion: room.quiz?.questions[room.quizProgression - 1],
+  });
+};
+
+export const showLeaderboards = async (
+  socket: Socket,
+  data: { token: string; roomId: string }
+) => {
+  const { token, roomId } = data;
+
+  if (!checkRoomId(roomId))
+    return socket.emit("user:error", {
+      error: `RoomId is required and must be a ${process.env.ROOM_ID_LENGTH}-character long string.`,
+    });
+
+  if (!checkObjectId(token))
+    return socket.emit("user:error", { error: "Token is invalid." });
+
+  const db = await connectToDatabase();
+  const room = await db.collection<Room>(roomCollection).findOne({ roomId });
+
+  if (!room) return socket.emit("user:error", { error: "Room not found." });
+
+  if (room.host.toString() !== token)
+    return socket.emit("user:error", {
+      error: "Only the host can progress the game.",
+    });
+
+  const sanitizedRoom = sanitizeRoom(room);
+
+  return socket.emit("quiz:leaderboard", {
+    participants: sanitizedRoom.participants,
+  });
+};
+
+export const progressGame = async (
+  socket: Socket,
+  data: { token: string; roomId: string }
+) => {
+  const { token, roomId } = data;
+
+  if (!checkRoomId(roomId))
+    return socket.emit("user:error", {
+      error: `RoomId is required and must be a ${process.env.ROOM_ID_LENGTH}-character long string.`,
+    });
+
+  if (!checkObjectId(token))
+    return socket.emit("user:error", { error: "Token is invalid." });
+
+  const db = await connectToDatabase();
+  const room = await db.collection<Room>(roomCollection).findOne({ roomId });
+
+  if (!room) return socket.emit("user:error", { error: "Room not found." });
+
+  if (room.host.toString() !== token)
+    return socket.emit("user:error", {
+      error: "Only the host can progress the game.",
+    });
+
   if (!room.quiz || !room.quiz.questions)
     return socket.emit("user:error", {
       error: "No quiz found in this room.",
@@ -40,8 +110,6 @@ export const progressGame = async (
     room.participants?.every(
       (p: Participant) => p.totalAnswers >= room.quizProgression - 1
     ) ?? false;
-  console.log(room.participants);
-  console.log(allAnswered);
 
   if (!allAnswered)
     return socket.emit("user:error", {
@@ -50,19 +118,22 @@ export const progressGame = async (
 
   const totalQuestions = room.quiz.questions.length;
 
-  const sanitizedRoom = sanitizeRoom(room);
-  if (room.quizProgression > totalQuestions) {
+  if (room.quizProgression >= totalQuestions) {
+    const sanitizedRoom = sanitizeRoom(room);
     socket
       .to(roomId)
       .emit("quiz:ended", { scores: sanitizedRoom.participants });
     return socket.emit("quiz:ended", { scores: sanitizedRoom.participants });
   }
+
   const sanitizedQuiz = sanitizeQuiz(room.quiz);
 
   try {
     await db
       .collection(roomCollection)
       .updateOne({ roomId }, { $inc: { quizProgression: 1 } });
+
+    const sanitizedRoom = sanitizeRoom(room);
 
     socket.emit("quiz:progressed", {
       participants: sanitizedRoom.participants,

@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 export interface Quiz {
   _id?: ObjectId;
   name: string;
+  description?: string;
   createdAt?: Date;
   createdBy?: string;
   questions: Question[];

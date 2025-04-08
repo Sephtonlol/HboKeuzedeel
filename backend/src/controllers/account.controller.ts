@@ -74,13 +74,24 @@ export const login = async (req: Request, res: Response) => {
 
     const match = await bcrypt.compare(password, result.user.password);
     if (!match) return res.status(422).json({ error: "Incorrect password" });
-
-    const token = crypto.randomBytes(32).toString("hex");
+    let token: string;
+    let tokenCheckResult;
+    do {
+      token = crypto.randomBytes(32).toString("hex");
+      tokenCheckResult = await db
+        .collection(userCollection)
+        .findOne({ "user.token": token });
+    } while (tokenCheckResult);
     await db
       .collection(userCollection)
-      .updateOne({ "user.username": email }, { $set: { "user.token": token } });
+      .updateOne({ "user.email": email }, { $set: { "user.token": token } });
 
-    res.json({ message: "Logged in", token });
+    res.json({
+      message: "Logged in",
+      token,
+      username: result.user.username,
+      userId: result._id,
+    });
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ error: "An error occurred during login" });
@@ -97,9 +108,9 @@ export const user = async (req: Request, res: Response) => {
   try {
     const db = await connectToDatabase();
 
-    const result = await db
-      .collection(userCollection)
-      .findOne({ "user.token": token });
+    const result = await db.collection(userCollection).findOne({
+      "user.token": token,
+    });
 
     if (!result) return res.status(404).json({ error: "User not found" });
     const { password, ...user } = result.user;
