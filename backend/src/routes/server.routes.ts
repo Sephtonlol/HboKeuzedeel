@@ -7,7 +7,12 @@ import {
   lock,
   reconnect,
 } from "../sockets/room.socket";
-import { answerQuestion, progressGame } from "../sockets/game.socket";
+import {
+  answerQuestion,
+  progressGame,
+  showAnswer,
+  showLeaderboard,
+} from "../sockets/game.socket";
 
 export default function socketRoutes(io: Server) {
   io.on("connection", (socket: Socket) => {
@@ -42,6 +47,14 @@ export default function socketRoutes(io: Server) {
 
     socket.on("game:progress", async (data) => {
       progressGame(socket, data);
+    });
+
+    socket.on("show:answer", async (data) => {
+      showAnswer(socket, data);
+    });
+
+    socket.on("show:leaderboard", async (data) => {
+      showLeaderboard(socket, data);
     });
 
     socket.on("disconnect", () => {

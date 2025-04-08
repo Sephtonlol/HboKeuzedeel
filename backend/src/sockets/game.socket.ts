@@ -7,7 +7,7 @@ import { sanitizeQuiz, sanitizeRoom } from "../utils/sanitize.utils";
 
 const roomCollection = "rooms";
 
-export const showAnswers = async (
+export const showAnswer = async (
   socket: Socket,
   data: { token: string; roomId: string }
 ) => {
@@ -46,7 +46,7 @@ export const showAnswers = async (
   });
 };
 
-export const showLeaderboards = async (
+export const showLeaderboard = async (
   socket: Socket,
   data: { token: string; roomId: string }
 ) => {
