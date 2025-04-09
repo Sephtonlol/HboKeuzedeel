@@ -1,0 +1,223 @@
+<div class="-container">
+  <div class="inputs">
+    <div class="header">
+      <input
+        type="text"
+        class="form-control input-text"
+        aria-label="Sizing example input"
+        aria-describedby="inputGroup-sizing-sm"
+        placeholder="Quiz Name"
+        [(ngModel)]="name"
+      />
+
+      <textarea
+        oninput="this.style.height='auto';this.style.height=this.scrollHeight + 'px'"
+        rows="1"
+        id="auto-textarea"
+        class="auto-expand-textarea form-control description"
+        placeholder="Description"
+        [(ngModel)]="description"
+      ></textarea>
+      <button class="btn btn-primary play-button" (click)="createQuiz()">
+        Create Quiz
+      </button>
+    </div>
+    <div class="questions">
+      @for (question of questions; track question || questionIndex; let
+      questionIndex = $index) {
+      <div class="question">
+        <textarea
+          oninput="this.style.height='auto';this.style.height=this.scrollHeight + 'px'"
+          rows="1"
+          id="auto-textarea"
+          class="auto-expand-textarea form-control"
+          placeholder="Question"
+          [(ngModel)]="questions[questionIndex].name"
+        ></textarea>
+        @if(questions[questionIndex].type === "multiple_choice" ){ @for (option
+        of getMultipleChoiceOptions(questionIndex); track optionIndex; let
+        optionIndex = $index) {
+        <div class="input-group">
+          <div class="input-group-text">
+            <input
+              name="multiple-choice-{{ questionIndex }}"
+              class="form-check-input mt-0"
+              type="radio"
+              [(ngModel)]="questions[questionIndex].answers.correctAnswer"
+              [value]="questions[questionIndex].answers.options[optionIndex]"
+              (change)="
+                questions[questionIndex].answers.correctAnswer =
+                  questions[questionIndex].answers.options[optionIndex]
+              "
+              aria-label="Radio button for following text input"
+            />
+          </div>
+          <input
+            type="text"
+            class="form-control multiple-choice-input"
+            [(ngModel)]="questions[questionIndex].answers.options[optionIndex]"
+            (ngModelChange)="
+              questions[questionIndex].answers.correctAnswer ===
+              questions[questionIndex].answers.options[optionIndex]
+                ? (questions[questionIndex].answers.correctAnswer = $event)
+                : null
+            "
+          />
+        </div>
+        }
+        <div class="button-outer">
+          <button
+            class="btn btn-secondary button-inner"
+            [class.disabled]="
+              questions[questionIndex].answers.options.length >= 8
+            "
+            (click)="addMultipleChoiceField(questionIndex)"
+          >
+            Add Field
+          </button>
+          <button
+            class="btn btn-secondary button-inner"
+            [class.disabled]="
+              questions[questionIndex].answers.options.length <= 1
+            "
+            (click)="removeMultipleChoiceField(questionIndex)"
+          >
+            Remove Field
+          </button>
+        </div>
+
+        } @else if( questions[questionIndex].type === "yes_no" ){
+        <div class="btn-group" role="group">
+          <input
+            type="radio"
+            class="btn-check"
+            id="yes-{{ questionIndex }}"
+            name="mode-{{ questionIndex }}"
+            autocomplete="off"
+            [(ngModel)]="questions[questionIndex].answers.correctAnswer"
+            [value]="true"
+          />
+          <label
+            class="btn btn-outline-success yes-no-button"
+            for="yes-{{ questionIndex }}"
+          >
+            <h6>Yes</h6>
+          </label>
+          <input
+            type="radio"
+            class="btn-check"
+            id="no-{{ questionIndex }}"
+            name="mode-{{ questionIndex }}"
+            autocomplete="off"
+            [(ngModel)]="questions[questionIndex].answers.correctAnswer"
+            [value]="false"
+          />
+          <label
+            class="btn btn-outline-danger yes-no-button"
+            for="no-{{ questionIndex }}"
+          >
+            <h6>No</h6>
+          </label>
+        </div>
+        }@else {
+        <textarea
+          oninput="this.style.height='auto';this.style.height=this.scrollHeight + 'px'"
+          rows="1"
+          id="auto-textarea"
+          class="auto-expand-textarea form-control"
+          placeholder="Answer"
+          [(ngModel)]="questions[questionIndex].answers.correctAnswer"
+        ></textarea>
+        }
+      </div>
+      }
+      <div class="button-outer">
+        <button class="btn btn-primary button-inner" (click)="openModal()">
+          Add Question
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div #questionTypeModal class="modal fade" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Question</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="radio"
+            name="radioDefault"
+            [(ngModel)]="questionType"
+            [value]="'yes_no'"
+          />
+          <label class="form-check-label" for="radioDefault1">
+            Yes/No Question
+          </label>
+        </div>
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="radio"
+            name="radioDefault"
+            [(ngModel)]="questionType"
+            [value]="'multiple_choice'"
+            checked
+          />
+          <label class="form-check-label" for="radioDefault2">
+            Multiple Choice Question
+          </label>
+        </div>
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="radio"
+            name="radioDefault"
+            [(ngModel)]="questionType"
+            [value]="'open'"
+          />
+          <label class="form-check-label" for="radioDefault3">
+            Open Question
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-primary" (click)="addQuestion()">
+          Add Question
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="toast align-items-center"
+  role="alert"
+  aria-live="assertive"
+  aria-atomic="true"
+  id="toast"
+>
+  <div class="d-flex">
+    <div class="toast-body">
+      <span> {{ result?.message || result?.error || "" }} </span>
+    </div>
+    <button
+      type="button"
+      class="btn-close me-2 m-auto"
+      data-bs-dismiss="toast"
+      aria-label="Close"
+    ></button>
+  </div>
+</div>

@@ -4,12 +4,21 @@
   align-items: center;
   flex-direction: column;
 }
-.-container {
-  max-width: 1000px;
-  width: 100%;
-}
 .content {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  width: 90%;
+}
+.nav {
+  margin-top: 0.5rem;
+}
+.nav-item {
+  margin: 0 0.5rem;
+  cursor: pointer;
+}
+@media (max-width: 576px) {
+  .nav {
+    flex-direction: column;
+  }
 }

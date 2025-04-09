@@ -1,6 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import "bootstrap/dist/css/bootstrap.min.css";
+@import "bootstrap-icons/font/bootstrap-icons.css";
 
 @font-face {
   font-family: condensed;
@@ -13,7 +14,10 @@ h4,
 h5,
 h6,
 span,
-p {
+p,
+input,
+textarea,
+button {
   margin: 0.2rem;
   font-family: condensed;
   font-weight: bold;
@@ -27,7 +31,6 @@ mat-slide-toggle {
 
 p {
   font-weight: normal;
-  margin: 0rem;
 }
 :root {
   --accent-color: #00d0d0;
@@ -46,4 +49,21 @@ body {
   background-color: var(--primary-color);
   margin: 0px;
   font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+.disabled {
+  cursor: not-allowed !important;
+  pointer-events: auto !important;
+}
+
+.disabled:active {
+  pointer-events: none !important;
+}
+.toast {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  z-index: 1000;
+  margin: 1rem;
+  width: auto;
+  max-width: calc(100% - 2rem);
 }

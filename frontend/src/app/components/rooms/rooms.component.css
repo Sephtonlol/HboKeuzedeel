@@ -1,7 +1,7 @@
 :host {
   display: flex;
   flex-wrap: wrap;
-  background-color: var(--tertiary-color);
+  background-color: var(--secondary-color);
   border-radius: 6px;
   padding: 0.75rem;
 }

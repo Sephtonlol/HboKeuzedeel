@@ -9,11 +9,23 @@ import { Quiz } from '../../interfaces/quiz.interface';
 })
 export class QuizComponent {
   @Input() quiz!: Quiz;
+
   showQuestions: boolean = false;
+  copied: boolean = false;
 
   @Output() selected = new EventEmitter<void>();
   toggleQuestions() {
     this.showQuestions = !this.showQuestions;
+  }
+  copy() {
+    navigator.clipboard
+      .writeText(this.quiz._id?.toString() || 'null')
+      .then(() => {
+        this.copied = true;
+        setTimeout(() => {
+          this.copied = false;
+        }, 1000);
+      });
   }
   selectQuiz() {
     this.selected.emit();

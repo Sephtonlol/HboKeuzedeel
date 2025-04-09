@@ -1,10 +1,23 @@
+<div class="header">
+  <span class="badge text-bg-secondary">{{ quiz._id }}</span>
+  @if(copied){
+
+  <i class="bi bi-check2 text-light"></i>
+  }@else {
+
+  <i class="bi bi-clipboard text-light" (click)="copy()"></i>
+  }
+</div>
 <h6>{{ quiz.name }}</h6>
+<p>{{ quiz.createdBy || "unknown" }}</p>
 @if(showQuestions){
 <ul>
   @for(question of quiz.questions; track question){
-  <li>
-    {{ question.name }}
-  </li>
+  <p>
+    <li>
+      {{ question.name }}
+    </li>
+  </p>
   }
 </ul>
 }
@@ -14,3 +27,4 @@
   </button>
   <button class="btn btn-primary" (click)="selectQuiz()">Select Quiz</button>
 </div>
+<div class="divider"></div>

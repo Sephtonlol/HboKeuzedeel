@@ -1,0 +1,44 @@
+<div class="content">
+  <div class="input-group search">
+    <button
+      class="btn btn-outline-secondary dropdown-toggle"
+      type="button"
+      data-bs-toggle="dropdown"
+      aria-expanded="false"
+    >
+      {{ selectedQuery }}
+    </button>
+    <ul class="dropdown-menu">
+      <li>
+        <a class="dropdown-item" (click)="changeQuery('All')">All</a>
+      </li>
+      <li><a class="dropdown-item" (click)="changeQuery('Name')">Name</a></li>
+      <li>
+        <a class="dropdown-item" (click)="changeQuery('Author')">Author</a>
+      </li>
+    </ul>
+    <input
+      type="text"
+      class="form-control"
+      aria-label="Text input with dropdown button"
+      placeholder="Search for quizzes..."
+      [(ngModel)]="searchInput"
+    />
+    <button
+      type="button"
+      class="btn btn-secondary"
+      (click)="search()"
+      [class.disabled]="!searchInput"
+    >
+      Search
+    </button>
+  </div>
+
+  <div class="quizzes-container">
+    @for(quiz of quizzes; track quiz._id){
+    <div class="quiz-card">
+      <app-quiz [quiz]="quiz"></app-quiz>
+    </div>
+    }
+  </div>
+</div>

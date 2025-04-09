@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -9,9 +9,25 @@ import { RouterLink } from '@angular/router';
 })
 export class HeaderComponent implements OnInit {
   isLoggedIn: boolean = false;
+
+  constructor(private router: Router) {
+    this.router.events.subscribe(() => {
+      this.checkLoginStatus();
+    });
+  }
+
+  logout() {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('username');
+    this.isLoggedIn = false;
+    this.router.navigate(['/login']);
+  }
+
   ngOnInit(): void {
-    if (localStorage.getItem('authToken')) {
-      this.isLoggedIn = true;
-    }
+    this.checkLoginStatus();
+  }
+
+  private checkLoginStatus(): void {
+    this.isLoggedIn = !!localStorage.getItem('authToken');
   }
 }

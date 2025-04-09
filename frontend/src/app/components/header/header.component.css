@@ -1,7 +1,11 @@
 :host {
   max-width: 1000px;
-  width: 100%;
+  width: 95%;
 }
+a {
+  cursor: pointer;
+}
+
 @media (max-width: 992px) {
   :host {
     padding: 0rem 1rem;

@@ -7,6 +7,9 @@ import { MatRadioModule } from '@angular/material/radio';
 import { RoomsComponent } from '../../components/rooms/rooms.component';
 import { SocketService } from '../../services/socket.service';
 import { CreateRoomComponent } from '../../components/create-room/create-room.component';
+import { CreateQuizComponent } from '../../components/create-quiz/create-quiz.component';
+import { JoinRoomComponent } from '../../components/join-room/join-room.component';
+import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-home',
@@ -17,15 +20,31 @@ import { CreateRoomComponent } from '../../components/create-room/create-room.co
     FormsModule,
     MatRadioModule,
     CreateRoomComponent,
+    CreateQuizComponent,
+    JoinRoomComponent,
     RoomsComponent,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })
 export class HomeComponent implements OnInit {
-  constructor(private socketService: SocketService) {}
+  loggedIn: boolean = false;
+  router: any;
+  constructor(
+    private socketService: SocketService,
+    private apiService: ApiService
+  ) {}
+  selectedTab: string = 'joinRoom';
 
-  ngOnInit(): void {
+  switchTabs(tab: string) {
+    this.selectedTab = tab;
+  }
+
+  async ngOnInit(): Promise<void> {
+    const result = await this.apiService.getUser(
+      localStorage.getItem('authToken') || ''
+    );
+    this.loggedIn = result.error ? false : true;
     this.socketService.roomUpdates.subscribe((data) => {
       console.log('Room updated:', data);
     });

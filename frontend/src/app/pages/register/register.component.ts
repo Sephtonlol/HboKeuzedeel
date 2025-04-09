@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
+import { Toast } from 'bootstrap';
 
 @Component({
   selector: 'app-register',
@@ -15,28 +16,34 @@ export class RegisterComponent implements OnInit {
   email: string = '';
   password: string = '';
   confirmPassword: string = '';
-  error: string = '';
-  success: string = '';
+  result: any = {};
 
   async register() {
     if (this.password !== this.confirmPassword) {
-      this.error = 'Passwords do not match';
+      this.result.error = 'Passwords do not match';
+      this.showToast();
+      console.log('yea');
+      return;
     }
-    const result = await this.apiService.register(
+    this.result = await this.apiService.register(
       this.username,
       this.email,
       this.password
     );
-    if (!result.error) {
-      console.log('Login successful', result);
-    }
-    this.error = result.error || '';
-    this.success = result.message || '';
+    this.showToast();
   }
 
   async ngOnInit() {
     if (localStorage.getItem('authToken')) {
       this.router.navigate(['/home']);
+    }
+  }
+
+  showToast() {
+    const toast = document.getElementById('toast');
+    if (toast) {
+      const _toast = new Toast(toast);
+      _toast.show();
     }
   }
 }

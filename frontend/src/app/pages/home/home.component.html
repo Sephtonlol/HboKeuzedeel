@@ -1,6 +1,45 @@
-<div class="-container">
-  <div class="content">
-    <app-create-room />
-    <app-rooms />
+<div class="content">
+  <div>
+    <div class="tabs-container">
+      @if(selectedTab === 'joinRoom'){
+      <app-join-room />
+      } @if(selectedTab === 'createRoom'){
+
+      <app-create-room />
+      } @if(selectedTab === 'createQuiz'){
+      <app-create-quiz />
+      }
+    </div>
+    @if(loggedIn){
+
+    <ul class="nav nav-pills nav-fill">
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          [class.active]="selectedTab === 'joinRoom'"
+          aria-current="page"
+          (click)="switchTabs('joinRoom')"
+          >Join Room</a
+        >
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          [class.active]="selectedTab === 'createRoom'"
+          (click)="switchTabs('createRoom')"
+          >Create Room</a
+        >
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          [class.active]="selectedTab === 'createQuiz'"
+          (click)="switchTabs('createQuiz')"
+          >Create Quiz</a
+        >
+      </li>
+    </ul>
+    }
   </div>
+  <app-rooms />
 </div>

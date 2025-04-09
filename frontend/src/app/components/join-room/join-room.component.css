@@ -1,0 +1,26 @@
+:host {
+  display: flex;
+  justify-content: center;
+}
+
+.-container {
+  background-color: var(--secondary-color);
+  border-radius: 6px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.175rem;
+}
+button {
+  width: 100%;
+}
+@media (max-width: 576px) {
+  .-container {
+    width: 100%;
+  }
+}

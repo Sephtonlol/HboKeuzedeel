@@ -6,9 +6,11 @@ import { PlayComponent } from './pages/play/play.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { ProfileComponent } from './pages/profile/profile.component';
+import { QuizzesComponent } from './pages/quizzes/quizzes.component';
 
 export const routes: Routes = [
   { path: 'home', component: HomeComponent },
+  { path: 'quizzes', component: QuizzesComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'profile', component: ProfileComponent },

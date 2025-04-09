@@ -1,19 +1,16 @@
-<h2>Create Room</h2>
 <div class="-container">
   <div class="left">
-    <h6 class="room-name">
-      <input
-        type="text"
-        class="form-control input-text"
-        aria-label="Sizing example input"
-        aria-describedby="inputGroup-sizing-sm"
-        placeholder="Room Name"
-        [(ngModel)]="roomName"
-      />
-    </h6>
+    <input
+      type="text"
+      class="form-control input-text room-name"
+      aria-label="Sizing example input"
+      aria-describedby="inputGroup-sizing-sm"
+      placeholder="Room Name"
+      [(ngModel)]="roomName"
+    />
 
     <div class="button-group">
-      <div class="btn-group" role="group">
+      <div class="btn-group radio-mode" role="group">
         <input
           type="radio"
           class="btn-check"
@@ -51,27 +48,29 @@
           ><h6>CO-OP</h6>
         </label>
       </div>
-      <div class="form-check">
-        <input
-          class="form-check-input"
-          type="checkbox"
-          id="gridCheck1"
-          [(ngModel)]="private"
-        />
-        <label class="form-check-label" for="gridCheck1">
-          <span> Private Room </span>
-        </label>
+      <div class="bottom">
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="gridCheck1"
+            [(ngModel)]="private"
+          />
+          <label class="form-check-label" for="gridCheck1">
+            <span> Private Room </span>
+          </label>
+        </div>
+        <button class="btn btn-primary play-button" (click)="createRoom()">
+          Play
+        </button>
       </div>
-      <button class="btn btn-primary play-button" (click)="createRoom()">
-        Play
-      </button>
     </div>
   </div>
   <div class="select-quiz-container">
     <div class="selected-quiz">
       @if(quiz){
       <h5>{{ quiz.name }}</h5>
-      <p>Created by: someMF</p>
+      <p>{{ quiz.createdBy || "unkown" }}</p>
       }@else {
       <div class="selected-quiz">
         <h5>No Quiz Selected</h5>

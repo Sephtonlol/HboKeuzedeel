@@ -98,24 +98,43 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-export const user = async (req: Request, res: Response) => {
-  const { token } = req.body;
-  if (!checkString(token))
-    return res
-      .status(422)
-      .json({ error: "Token is required and must be a string." });
-
+export const verifyToken = async (
+  authHeader: string | undefined
+): Promise<any> => {
   try {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      throw new Error("Authorization header is missing or invalid.");
+    }
+
+    const token = authHeader.split(" ")[1];
     const db = await connectToDatabase();
 
     const result = await db.collection(userCollection).findOne({
       "user.token": token,
     });
 
-    if (!result) return res.status(404).json({ error: "User not found" });
-    const { password, ...user } = result.user;
-    res.json({ user });
-  } catch (error) {
+    if (!result) {
+      return false;
+    }
+
+    return result.user;
+  } catch (error: any) {
+    console.error("Error during token verification:", error);
+    return false;
+  }
+};
+
+export const user = async (req: Request, res: Response) => {
+  try {
+    const verifiedUser = await verifyToken(req.headers.authorization);
+
+    if (!verifiedUser) {
+      return res.status(401).json({ error: "Invalid or expired token." });
+    }
+
+    const { password, token, ...userWithoutSensitiveData } = verifiedUser;
+    res.json({ user: userWithoutSensitiveData });
+  } catch (error: any) {
     return res
       .status(500)
       .json({ error: "An error occurred whilst retrieving user." });

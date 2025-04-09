@@ -4,11 +4,15 @@ import { Quiz } from "../../interfaces/quiz.interface";
 import { ObjectId } from "mongodb";
 import { checkObjectId, checkString } from "../utils/types.utils";
 import { sanitizeQuiz, sanitizeQuizzes } from "../utils/sanitize.utils";
+import { verifyToken } from "./account.controller";
 
 const quizCollection = "quizzes";
 
 export const createQuiz = async (req: Request, res: Response) => {
   const { name, questions } = req.body;
+
+  const isAuthorized = await verifyToken(req.headers.authorization);
+  if (!isAuthorized) return res.status(401).json({ error: "Unauthorized" });
 
   if (!checkString(name))
     return res

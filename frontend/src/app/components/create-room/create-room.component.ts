@@ -13,13 +13,13 @@ import { Modal } from 'bootstrap';
   styleUrl: './create-room.component.css',
 })
 export class CreateRoomComponent {
+  @ViewChild('quizzesModal') modalElement!: ElementRef;
   constructor(private apiService: ApiService) {}
   roomName!: string;
   mode: 'ffa' | 'team' | 'coop' = 'ffa';
   private: boolean = false;
   quiz!: Quiz;
 
-  @ViewChild('quizzesModal') modalElement!: ElementRef;
   quizzesModal!: Modal;
   showQuizzes: boolean = false;
   quizzes!: Quiz[];
