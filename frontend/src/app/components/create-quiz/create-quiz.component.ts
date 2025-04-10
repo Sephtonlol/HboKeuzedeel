@@ -8,6 +8,7 @@ import {
 } from '../../interfaces/quiz.interface';
 import { Modal, Toast } from 'bootstrap';
 import { ApiService } from '../../services/api.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-create-quiz',
@@ -16,7 +17,10 @@ import { ApiService } from '../../services/api.service';
   styleUrl: './create-quiz.component.css',
 })
 export class CreateQuizComponent {
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    private toastService: ToastService
+  ) {}
   @ViewChild('questionTypeModal') modalElement!: ElementRef;
   name: string = '';
   description: string = '';
@@ -127,10 +131,8 @@ export class CreateQuizComponent {
   }
 
   showToast() {
-    const toast = document.getElementById('toast');
-    if (toast) {
-      const _toast = new Toast(toast);
-      _toast.show();
-    }
+    this.toastService.show(
+      this.result.error || this.result.message || 'something went wrong.'
+    );
   }
 }

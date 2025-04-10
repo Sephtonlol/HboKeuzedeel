@@ -25,19 +25,27 @@ export class SocketService {
     });
 
     // Handle events
-    this.socket.on('room:update', (data) => this.roomUpdates.next(data));
-    this.socket.on('user:error', (data) => this.userErrors.next(data));
+    this.socket.on('room:update', (data) => console.log('Room update:', data));
+    this.socket.on('user:error', (data) => console.log('Error:', data));
+    this.socket.on('user:success', (data) => console.log('Success:', data));
     this.socket.on('room:create', (data) => console.log('Room Created:', data));
     this.socket.on('room:join', (data) => console.log('Joined Room:', data));
     this.socket.on('room:kick', (data) => console.log('Kicked:', data));
     this.socket.on('room:lock', (data) => console.log('Room Locked:', data));
-    this.socket.on('quiz:progressed', (data) => this.quizProgress.next(data));
+    this.socket.on('show:answer', (data) => console.log('Show answer:', data));
+    this.socket.on('show:leaderboard', (data) =>
+      console.log('Show leaderboard:', data)
+    );
+    this.socket.on('quiz:progressed', (data) =>
+      console.log('Quiz progressed:', data)
+    );
     this.socket.on('question:answered', (data) =>
-      this.questionAnswered.next(data)
+      console.log('Question answered:', data)
     );
   }
 
   createRoom(
+    token: string,
     name: string,
     roomName: string,
     quizId: string,
@@ -45,6 +53,7 @@ export class SocketService {
     mode: Mode
   ) {
     this.socket.emit('room:create', {
+      token,
       name,
       roomName,
       quizId,
@@ -71,6 +80,14 @@ export class SocketService {
 
   lockRoom(token: string, roomId: string) {
     this.socket.emit('room:lock', { token, roomId });
+  }
+
+  showLeaderboard(token: string, roomId: string) {
+    this.socket.emit('show:leaderboard', { token, roomId });
+  }
+
+  showAnswer(token: string, roomId: string) {
+    this.socket.emit('show:answer', { token, roomId });
   }
 
   progressGame(token: string, roomId: string) {

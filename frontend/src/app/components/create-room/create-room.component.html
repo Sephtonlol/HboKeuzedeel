@@ -60,7 +60,11 @@
             <span> Private Room </span>
           </label>
         </div>
-        <button class="btn btn-primary play-button" (click)="createRoom()">
+        <button
+          class="btn btn-primary play-button"
+          [class.disabled]="!quiz || !roomName"
+          (click)="createRoom()"
+        >
           Play
         </button>
       </div>

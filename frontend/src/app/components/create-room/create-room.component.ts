@@ -4,6 +4,8 @@ import { ApiService } from '../../services/api.service';
 import { QuizComponent } from '../quiz/quiz.component';
 import { FormsModule } from '@angular/forms';
 import { Modal } from 'bootstrap';
+import { SocketService } from '../../services/socket.service';
+import { ObjectId } from 'mongodb';
 
 @Component({
   selector: 'app-create-room',
@@ -14,7 +16,10 @@ import { Modal } from 'bootstrap';
 })
 export class CreateRoomComponent {
   @ViewChild('quizzesModal') modalElement!: ElementRef;
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    private socketService: SocketService
+  ) {}
   roomName!: string;
   mode: 'ffa' | 'team' | 'coop' = 'ffa';
   private: boolean = false;
@@ -43,6 +48,20 @@ export class CreateRoomComponent {
     this.closeModal();
   }
   createRoom() {
-    console.log(this.mode);
+    if (!this.roomName) console.error('Room name is required');
+    if (!this.quiz) console.error('Quiz is required');
+
+    let teams: undefined | number = undefined;
+    if (this.mode === 'team') {
+      teams = 2;
+    }
+    this.socketService.createRoom(
+      localStorage.getItem('authToken') || '',
+      localStorage.getItem('username') || '',
+      this.roomName,
+      this.quiz._id as unknown as string,
+      !this.private,
+      { type: this.mode, teams: teams }
+    );
   }
 }

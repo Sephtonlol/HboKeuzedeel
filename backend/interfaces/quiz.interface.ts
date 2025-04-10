@@ -18,6 +18,7 @@ export interface Question {
 export type Answer = YesNoAnswer | MultipleChoiceAnswer | OpenAnswer;
 
 export interface YesNoAnswer {
+  options: string[];
   correctAnswer: boolean;
 }
 
@@ -27,5 +28,6 @@ export interface MultipleChoiceAnswer {
 }
 
 export interface OpenAnswer {
+  options: string[];
   correctAnswer: string;
 }

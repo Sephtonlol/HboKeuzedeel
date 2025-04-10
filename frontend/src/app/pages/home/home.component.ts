@@ -5,7 +5,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatRadioModule } from '@angular/material/radio';
 import { RoomsComponent } from '../../components/rooms/rooms.component';
-import { SocketService } from '../../services/socket.service';
 import { CreateRoomComponent } from '../../components/create-room/create-room.component';
 import { CreateQuizComponent } from '../../components/create-quiz/create-quiz.component';
 import { JoinRoomComponent } from '../../components/join-room/join-room.component';
@@ -30,10 +29,7 @@ import { ApiService } from '../../services/api.service';
 export class HomeComponent implements OnInit {
   loggedIn: boolean = false;
   router: any;
-  constructor(
-    private socketService: SocketService,
-    private apiService: ApiService
-  ) {}
+  constructor(private apiService: ApiService) {}
   selectedTab: string = 'joinRoom';
 
   switchTabs(tab: string) {
@@ -45,11 +41,5 @@ export class HomeComponent implements OnInit {
       localStorage.getItem('authToken') || ''
     );
     this.loggedIn = result.error ? false : true;
-    this.socketService.roomUpdates.subscribe((data) => {
-      console.log('Room updated:', data);
-    });
-    this.socketService.userErrors.subscribe((error) => {
-      console.error('Error:', error);
-    });
   }
 }

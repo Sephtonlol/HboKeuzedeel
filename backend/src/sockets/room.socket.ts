@@ -17,6 +17,7 @@ const characters = process.env.ID_CHARACTERS as string;
 export const create = async (
   socket: Socket,
   data: {
+    token: string;
     name: string;
     roomName: string;
     quizId: string;
@@ -25,6 +26,15 @@ export const create = async (
   }
 ) => {
   const { name, roomName, quizId, public: _public, mode } = data;
+
+  const db = await connectToDatabase();
+  const isAuthorized = await db
+    .collection("tokens")
+    .findOne({ token: new ObjectId(data.token) });
+  if (!isAuthorized)
+    return socket.emit("user:error", {
+      error: "Unauthorized.",
+    });
 
   if (!checkString(name))
     return socket.emit("user:error", {
@@ -63,7 +73,6 @@ export const create = async (
       error: "Mode teams is only valid for team mode.",
     });
 
-  const db = await connectToDatabase();
   const quiz = await db
     .collection<Quiz>(quizCollection)
     .findOne({ _id: new ObjectId(quizId) });
