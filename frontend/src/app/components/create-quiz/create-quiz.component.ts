@@ -74,6 +74,9 @@ export class CreateQuizComponent {
     console.log(this.questions);
     this.closeModal();
   }
+  deleteQuestion(index: number) {
+    this.questions.splice(index, 1);
+  }
 
   addMultipleChoiceField(index: number) {
     const question = this.questions[index].answers as MultipleChoiceAnswer;
