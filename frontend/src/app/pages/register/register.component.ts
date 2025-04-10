@@ -3,7 +3,6 @@ import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { Toast } from 'bootstrap';
-import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-register',
@@ -12,11 +11,7 @@ import { ToastService } from '../../services/toast.service';
   styleUrl: './register.component.css',
 })
 export class RegisterComponent implements OnInit {
-  constructor(
-    private apiService: ApiService,
-    private router: Router,
-    private toastService: ToastService
-  ) {}
+  constructor(private apiService: ApiService, private router: Router) {}
   username: string = '';
   email: string = '';
   password: string = '';
@@ -45,8 +40,10 @@ export class RegisterComponent implements OnInit {
   }
 
   showToast() {
-    this.toastService.show(
-      this.result.error || this.result.message || 'something went wrong.'
-    );
+    const toast = document.getElementById('toast');
+    if (toast) {
+      const _toast = new Toast(toast);
+      _toast.show();
+    }
   }
 }

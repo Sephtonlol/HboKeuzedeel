@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { Router, RouterLink } from '@angular/router';
-import { ToastService } from '../../services/toast.service';
+import { Toast } from 'bootstrap';
 
 @Component({
   selector: 'app-login',
@@ -11,11 +11,7 @@ import { ToastService } from '../../services/toast.service';
   styleUrl: './login.component.css',
 })
 export class LoginComponent implements OnInit {
-  constructor(
-    private apiService: ApiService,
-    private router: Router,
-    private toastService: ToastService
-  ) {}
+  constructor(private apiService: ApiService, private router: Router) {}
   email: string = '';
   password: string = '';
   result!: any;
@@ -36,8 +32,10 @@ export class LoginComponent implements OnInit {
   }
 
   showToast() {
-    this.toastService.show(
-      this.result.error || this.result.message || 'something went wrong.'
-    );
+    const toast = document.getElementById('toast');
+    if (toast) {
+      const _toast = new Toast(toast);
+      _toast.show();
+    }
   }
 }

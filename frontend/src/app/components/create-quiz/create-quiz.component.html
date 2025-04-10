@@ -201,17 +201,18 @@
     </div>
   </div>
 </div>
-
 <div
-  class="toast align-items-center"
+  id="toast"
+  class="toast align-items-center text-bg-primary border-0 position-fixed bottom-0 end-0 m-3"
   role="alert"
   aria-live="assertive"
   aria-atomic="true"
-  id="toast"
 >
   <div class="d-flex">
     <div class="toast-body">
-      <span> {{ result?.message || result?.error || "" }} </span>
+      <span>{{
+        result?.message || result?.error || "something went wrong."
+      }}</span>
     </div>
     <button
       type="button"
