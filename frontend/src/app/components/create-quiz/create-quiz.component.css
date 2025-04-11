@@ -29,6 +29,7 @@ textarea {
 .inputs {
   display: flex;
   justify-content: space-between;
+  gap: 1.5rem;
 }
 .questions {
   display: flex;
@@ -70,6 +71,21 @@ textarea {
 }
 i {
   cursor: pointer;
-  align-self: end;
+  align-self: center;
   color: var(--white-color);
+}
+.question-header {
+  display: flex;
+  justify-content: end;
+  textarea {
+    flex-grow: 1;
+  }
+}
+@media (max-width: 768px) {
+  .inputs {
+    flex-direction: column;
+  }
+  .questions {
+    max-width: unset;
+  }
 }

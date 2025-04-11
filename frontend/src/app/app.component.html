@@ -1,4 +1,27 @@
 <div class="-container" data-bs-theme="dark">
   <app-header />
   <router-outlet />
+  <div
+    class="toast align-items-center text-bg{{
+      toastType
+    }} border-0 position-fixed bottom-0 end-0 m-3 show"
+    role="alert"
+    aria-live="assertive "
+    aria-atomic="true"
+    [class.showing]="toastShow"
+  >
+    <div class="d-flex">
+      <div class="toast-body">
+        <span>
+          {{ toastMessage }}
+        </span>
+      </div>
+      <button
+        type="button"
+        class="btn-close me-2 m-auto"
+        aria-label="Close"
+        (click)="toastShow = false"
+      ></button>
+    </div>
+  </div>
 </div>

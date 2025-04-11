@@ -46,7 +46,6 @@ export const getRoom = async (req: Request, res: Response) => {
         (participant: { token: string; name: string }) =>
           participant.token === room.host
       );
-      console.log(room.host, hostParticipant);
       if (hostParticipant) {
         room.hostName = hostParticipant.name;
       }

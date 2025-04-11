@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { Modal } from 'bootstrap';
 import { SocketService } from '../../services/socket.service';
 import { Subscription } from 'rxjs';
+import { ToastService } from '../../toast.service';
 
 @Component({
   selector: 'app-create-room',
@@ -85,14 +86,6 @@ export class CreateRoomComponent implements OnInit {
     if (this.mode === 'team') {
       teams = 2;
     }
-    console.log(
-      localStorage.getItem('authToken') || '',
-      user.user.username,
-      this.roomName,
-      this.quiz._id as unknown as string,
-      !this.private,
-      { type: this.mode, teams: teams }
-    );
     this.socketService.createRoom(
       localStorage.getItem('authToken') || '',
       user.user.username,
@@ -101,7 +94,5 @@ export class CreateRoomComponent implements OnInit {
       !this.private,
       { type: this.mode, teams: teams }
     );
-
-    console.log('Creating room...');
   }
 }

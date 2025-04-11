@@ -3,6 +3,7 @@ import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { Toast } from 'bootstrap';
+import { ToastService } from '../../toast.service';
 
 @Component({
   selector: 'app-register',
@@ -11,7 +12,11 @@ import { Toast } from 'bootstrap';
   styleUrl: './register.component.css',
 })
 export class RegisterComponent implements OnInit {
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(
+    private apiService: ApiService,
+    private router: Router,
+    private toastService: ToastService
+  ) {}
   username: string = '';
   email: string = '';
   password: string = '';
@@ -21,29 +26,19 @@ export class RegisterComponent implements OnInit {
   async register() {
     if (this.password !== this.confirmPassword) {
       this.result.error = 'Passwords do not match';
-      this.showToast();
-      console.log('yea');
-      return;
+    } else {
+      this.result = await this.apiService.register(
+        this.username,
+        this.email,
+        this.password
+      );
     }
-    this.result = await this.apiService.register(
-      this.username,
-      this.email,
-      this.password
-    );
-    this.showToast();
+    this.toastService.show(this.result);
   }
 
   async ngOnInit() {
     if (localStorage.getItem('authToken')) {
       this.router.navigate(['/home']);
-    }
-  }
-
-  showToast() {
-    const toast = document.getElementById('toast');
-    if (toast) {
-      const _toast = new Toast(toast);
-      _toast.show();
     }
   }
 }

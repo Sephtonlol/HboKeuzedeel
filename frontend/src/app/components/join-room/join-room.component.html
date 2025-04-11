@@ -17,5 +17,11 @@
       [(ngModel)]="roomId"
     />
   </div>
-  <button class="btn btn-primary play-button" (click)="joinRoom()">Play</button>
+  <button
+    class="btn btn-primary play-button"
+    [class.disabled]="!roomId || !username"
+    (click)="joinRoom()"
+  >
+    Play
+  </button>
 </div>

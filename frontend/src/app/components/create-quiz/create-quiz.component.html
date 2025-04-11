@@ -18,7 +18,11 @@
         placeholder="Description"
         [(ngModel)]="description"
       ></textarea>
-      <button class="btn btn-primary play-button" (click)="createQuiz()">
+      <button
+        class="btn btn-primary play-button"
+        [class.disabled]="!name || questions.length < 1"
+        (click)="createQuiz()"
+      >
         Create Quiz
       </button>
     </div>
@@ -26,15 +30,17 @@
       @for (question of questions; track question || questionIndex; let
       questionIndex = $index) {
       <div class="question">
-        <i class="bi bi-trash3" (click)="deleteQuestion(questionIndex)"></i>
-        <textarea
-          oninput="this.style.height='auto';this.style.height=this.scrollHeight + 'px'"
-          rows="1"
-          id="auto-textarea"
-          class="auto-expand-textarea form-control"
-          placeholder="Question"
-          [(ngModel)]="questions[questionIndex].name"
-        ></textarea>
+        <div class="question-header">
+          <i class="bi bi-trash3" (click)="deleteQuestion(questionIndex)"></i>
+          <textarea
+            oninput="this.style.height='auto';this.style.height=this.scrollHeight + 'px'"
+            rows="1"
+            id="auto-textarea"
+            class="auto-expand-textarea form-control"
+            placeholder="Question"
+            [(ngModel)]="questions[questionIndex].name"
+          ></textarea>
+        </div>
         @if(questions[questionIndex].type === "multiple_choice" ){ @for (option
         of getMultipleChoiceOptions(questionIndex); track optionIndex; let
         optionIndex = $index) {
@@ -102,7 +108,7 @@
             class="btn btn-outline-success yes-no-button"
             for="yes-{{ questionIndex }}"
           >
-            <h6>Yes</h6>
+            <h6>True</h6>
           </label>
           <input
             type="radio"
@@ -117,7 +123,7 @@
             class="btn btn-outline-danger yes-no-button"
             for="no-{{ questionIndex }}"
           >
-            <h6>No</h6>
+            <h6>False</h6>
           </label>
         </div>
         }@else {
@@ -200,26 +206,5 @@
         </button>
       </div>
     </div>
-  </div>
-</div>
-<div
-  id="toast"
-  class="toast align-items-center text-bg-primary border-0 position-fixed bottom-0 end-0 m-3"
-  role="alert"
-  aria-live="assertive"
-  aria-atomic="true"
->
-  <div class="d-flex">
-    <div class="toast-body">
-      <span>{{
-        result?.message || result?.error || "something went wrong."
-      }}</span>
-    </div>
-    <button
-      type="button"
-      class="btn-close me-2 m-auto"
-      data-bs-dismiss="toast"
-      aria-label="Close"
-    ></button>
   </div>
 </div>

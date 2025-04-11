@@ -12,3 +12,12 @@
   display: flex;
   flex-direction: column;
 }
+
+.toast {
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
+}
+
+.toast.showing {
+  opacity: 1;
+}

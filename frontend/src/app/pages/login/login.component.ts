@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { Router, RouterLink } from '@angular/router';
 import { Toast } from 'bootstrap';
+import { ToastService } from '../../toast.service';
 
 @Component({
   selector: 'app-login',
@@ -11,7 +12,11 @@ import { Toast } from 'bootstrap';
   styleUrl: './login.component.css',
 })
 export class LoginComponent implements OnInit {
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(
+    private apiService: ApiService,
+    private router: Router,
+    private toastService: ToastService
+  ) {}
   email: string = '';
   password: string = '';
   result!: any;
@@ -22,7 +27,7 @@ export class LoginComponent implements OnInit {
       localStorage.setItem('authToken', this.result.token);
       this.router.navigate(['/home']);
     }
-    this.showToast();
+    this.toastService.show(this.result);
   }
   async ngOnInit() {
     if (localStorage.getItem('authToken')) {
@@ -34,14 +39,6 @@ export class LoginComponent implements OnInit {
     );
     if (result.user) {
       this.router.navigate(['/home']);
-    }
-  }
-
-  showToast() {
-    const toast = document.getElementById('toast');
-    if (toast) {
-      const _toast = new Toast(toast);
-      _toast.show();
     }
   }
 }
