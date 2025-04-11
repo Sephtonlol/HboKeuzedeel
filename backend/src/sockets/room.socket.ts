@@ -25,68 +25,71 @@ export const create = async (
     mode: Mode;
   }
 ) => {
-  const { name, roomName, quizId, public: _public, mode } = data;
-
-  const db = await connectToDatabase();
-  const isAuthorized = await db
-    .collection("tokens")
-    .findOne({ token: new ObjectId(data.token) });
-  if (!isAuthorized)
-    return socket.emit("user:error", {
-      error: "Unauthorized.",
-    });
-
-  if (!checkString(name))
-    return socket.emit("user:error", {
-      error: "Name is required and must be a non-empty string.",
-    });
-
-  if (!checkString(roomName))
-    return socket.emit("user:error", {
-      error: "RoomName is required and must be a non-empty string.",
-    });
-
-  if (!checkObjectId(quizId))
-    return socket.emit("user:error", {
-      error: "QuizId is required and must be an objectId.",
-    });
-
-  if (!mode) return socket.emit("user:error", { error: "Mode is required." });
-
-  if (mode.type !== "team" && mode.type !== "ffa" && mode.type !== "coop") {
-    return socket.emit("user:error", {
-      error: "Mode type must be either 'team', 'ffa', or 'coop'.",
-    });
-  }
-
-  if (
-    mode.type === "team" &&
-    (typeof mode.teams !== "number" || mode.teams < 2)
-  ) {
-    return socket.emit("user:error", {
-      error: "Mode teams must be a number greater than 1.",
-    });
-  }
-
-  if (mode.type !== "team" && mode.teams)
-    return socket.emit("user:error", {
-      error: "Mode teams is only valid for team mode.",
-    });
-
-  const quiz = await db
-    .collection<Quiz>(quizCollection)
-    .findOne({ _id: new ObjectId(quizId) });
-
-  if (!quiz)
-    return socket.emit("user:error", { error: "Could not find quiz." });
-
-  const typedQuiz: Quiz = {
-    _id: quiz._id,
-    name: quiz.name,
-    questions: quiz.questions,
-  };
-
+  const { name, roomName, quizId, public: _public, mode, token } = data;
   try {
+    const db = await connectToDatabase();
+    const isAuthorized = await db
+      .collection("users")
+      .findOne({ "user.token": token });
+
+    if (!isAuthorized) {
+      console.error(`Authorization failed for token: ${token}`);
+    }
+    if (!isAuthorized)
+      return socket.emit("user:error", {
+        error: "Unauthorized.",
+      });
+
+    if (!checkString(name))
+      return socket.emit("user:error", {
+        error: "Name is required and must be a non-empty string.",
+      });
+
+    if (!checkString(roomName))
+      return socket.emit("user:error", {
+        error: "RoomName is required and must be a non-empty string.",
+      });
+
+    if (!checkObjectId(quizId))
+      return socket.emit("user:error", {
+        error: "QuizId is required and must be an objectId.",
+      });
+
+    if (!mode) return socket.emit("user:error", { error: "Mode is required." });
+
+    if (mode.type !== "team" && mode.type !== "ffa" && mode.type !== "coop") {
+      return socket.emit("user:error", {
+        error: "Mode type must be either 'team', 'ffa', or 'coop'.",
+      });
+    }
+
+    if (
+      mode.type === "team" &&
+      (typeof mode.teams !== "number" || mode.teams < 2)
+    ) {
+      return socket.emit("user:error", {
+        error: "Mode teams must be a number greater than 1.",
+      });
+    }
+
+    if (mode.type !== "team" && mode.teams)
+      return socket.emit("user:error", {
+        error: "Mode teams is only valid for team mode.",
+      });
+
+    const quiz = await db
+      .collection<Quiz>(quizCollection)
+      .findOne({ _id: new ObjectId(quizId) });
+
+    if (!quiz)
+      return socket.emit("user:error", { error: "Could not find quiz." });
+
+    const typedQuiz: Quiz = {
+      _id: quiz._id,
+      name: quiz.name,
+      questions: quiz.questions,
+    };
+
     const rooms = await db.collection("rooms").find().toArray();
     const roomNumbers: string[] = rooms.map((room) => room.roomId);
 
@@ -142,66 +145,67 @@ export const join = async (
   data: { name: string; roomId: string; team?: number }
 ) => {
   const { name, roomId, team } = data;
-
-  if (!checkString(name))
-    return socket.emit("user:error", {
-      error: "Name is required and must be a non-empty string.",
-    });
-
-  if (!checkRoomId(roomId))
-    return socket.emit("user:error", {
-      error: `RoomId is required and must be a ${process.env.ROOM_ID_LENGTH}-character long string.`,
-    });
-
-  const cleanRoomId = cleanString(roomId);
-
-  const db = await connectToDatabase();
-
-  const room = await db
-    .collection<Room>(roomCollection)
-    .findOne({ roomId: cleanRoomId });
-
-  if (!room) return socket.emit("user:error", { error: "Room not found." });
-
-  if (room.locked)
-    return socket.emit("user:error", { error: "Room has been locked." });
-
-  if (room.quizProgression > 0)
-    return socket.emit("user:error", {
-      error: "Room has already started the quiz.",
-    });
-
-  if (team || typeof team !== "number")
-    return socket.emit("user:error", {
-      error: "Team is required and must be of type number.",
-    });
-
-  if (!room.participants)
-    return socket.emit("user:error", { error: "Room participants not found." });
-
-  for (const participant of room.participants) {
-    if (participant.name === name) {
-      return socket.emit("user:error", {
-        error: "Name provided already exists in room.",
-      });
-    }
-  }
-
-  const participantToken = new ObjectId();
-
-  const newParticipant = {
-    name,
-    token: participantToken,
-    score: 0,
-    correctAnswers: 0,
-    totalAnswers: 0,
-    answers: [],
-    ...(room.mode?.type === "team" && { team }),
-  };
-
-  room.participants.push(newParticipant);
-
   try {
+    if (!checkString(name))
+      return socket.emit("user:error", {
+        error: "Name is required and must be a non-empty string.",
+      });
+
+    if (!checkRoomId(roomId))
+      return socket.emit("user:error", {
+        error: `RoomId is required and must be a ${process.env.ROOM_ID_LENGTH}-character long string.`,
+      });
+
+    const cleanRoomId = cleanString(roomId);
+
+    const db = await connectToDatabase();
+
+    const room = await db
+      .collection<Room>(roomCollection)
+      .findOne({ roomId: cleanRoomId });
+
+    if (!room) return socket.emit("user:error", { error: "Room not found." });
+
+    if (room.locked)
+      return socket.emit("user:error", { error: "Room has been locked." });
+
+    if (room.quizProgression > 0)
+      return socket.emit("user:error", {
+        error: "Room has already started the quiz.",
+      });
+
+    if (team || typeof team !== "number")
+      return socket.emit("user:error", {
+        error: "Team is required and must be of type number.",
+      });
+
+    if (!room.participants)
+      return socket.emit("user:error", {
+        error: "Room participants not found.",
+      });
+
+    for (const participant of room.participants) {
+      if (participant.name === name) {
+        return socket.emit("user:error", {
+          error: "Name provided already exists in room.",
+        });
+      }
+    }
+
+    const participantToken = new ObjectId();
+
+    const newParticipant = {
+      name,
+      token: participantToken,
+      score: 0,
+      correctAnswers: 0,
+      totalAnswers: 0,
+      answers: [],
+      ...(room.mode?.type === "team" && { team }),
+    };
+
+    room.participants.push(newParticipant);
+
     await db
       .collection(roomCollection)
       .updateOne({ roomId }, { $set: { participants: room.participants } });
@@ -235,33 +239,32 @@ export const kick = async (
   data: { token: string; kick: string; roomId: string }
 ) => {
   const { token, kick, roomId } = data;
-
-  if (!checkObjectId(token))
-    return socket.emit("user:error", {
-      error: "Token is required and must be an objectId.",
-    });
-
-  if (!checkRoomId(roomId))
-    return socket.emit("user:error", {
-      error: `RoomId is required and must be a ${process.env.ROOM_ID_LENGTH}-character long string.`,
-    });
-
-  if (!checkString(kick))
-    return socket.emit("user:error", {
-      error: "Kick is required and must be a non-empty string.",
-    });
-
-  const db = await connectToDatabase();
-  const room = await db.collection<Room>(roomCollection).findOne({ roomId });
-
-  if (!room) return socket.emit("user:error", { error: "Room not found." });
-
-  if (token !== room.host.toString())
-    return socket.emit("user:error", {
-      error: "Only the host can kick participants.",
-    });
-
   try {
+    if (!checkObjectId(token))
+      return socket.emit("user:error", {
+        error: "Token is required and must be an objectId.",
+      });
+
+    if (!checkRoomId(roomId))
+      return socket.emit("user:error", {
+        error: `RoomId is required and must be a ${process.env.ROOM_ID_LENGTH}-character long string.`,
+      });
+
+    if (!checkString(kick))
+      return socket.emit("user:error", {
+        error: "Kick is required and must be a non-empty string.",
+      });
+
+    const db = await connectToDatabase();
+    const room = await db.collection<Room>(roomCollection).findOne({ roomId });
+
+    if (!room) return socket.emit("user:error", { error: "Room not found." });
+
+    if (token !== room.host.toString())
+      return socket.emit("user:error", {
+        error: "Only the host can kick participants.",
+      });
+
     const sanitizedRoom = sanitizeRoom(room);
     const updatedParticipants = sanitizedRoom.participants.filter(
       (participant: Participant) => !compare(participant.name, kick)
@@ -300,26 +303,27 @@ export const leave = async (
   data: { token: string; roomId: string }
 ) => {
   const { token, roomId } = data;
-
-  if (!checkObjectId(token))
-    return socket.emit("user:error", {
-      error: "Token is required and must be an objectId.",
-    });
-
-  if (!checkRoomId(roomId))
-    return socket.emit("user:error", {
-      error: `RoomId is required and must be a ${process.env.ROOM_ID_LENGTH}-character long string.`,
-    });
-
-  const db = await connectToDatabase();
-  const room = await db.collection<Room>(roomCollection).findOne({ roomId });
-
-  if (!room) return socket.emit("user:error", { error: "Room not found." });
-
-  if (!room.participants)
-    return socket.emit("user:error", { error: "Room participants not found." });
-
   try {
+    if (!checkObjectId(token))
+      return socket.emit("user:error", {
+        error: "Token is required and must be an objectId.",
+      });
+
+    if (!checkRoomId(roomId))
+      return socket.emit("user:error", {
+        error: `RoomId is required and must be a ${process.env.ROOM_ID_LENGTH}-character long string.`,
+      });
+
+    const db = await connectToDatabase();
+    const room = await db.collection<Room>(roomCollection).findOne({ roomId });
+
+    if (!room) return socket.emit("user:error", { error: "Room not found." });
+
+    if (!room.participants)
+      return socket.emit("user:error", {
+        error: "Room participants not found.",
+      });
+
     const updatedParticipants = room.participants.filter(
       (participant: Participant) => participant.token?.toString() !== token
     );
@@ -360,18 +364,17 @@ export const reconnect = async (
   data: { token: string; roomId: string }
 ) => {
   const { token, roomId } = data;
-
-  if (!checkObjectId(token))
-    return socket.emit("user:error", {
-      error: "Token is required and must be an objectId.",
-    });
-
-  if (!checkRoomId(roomId))
-    return socket.emit("user:error", {
-      error: `RoomId is required and must be a ${process.env.ROOM_ID_LENGTH}-character long string.`,
-    });
-
   try {
+    if (!checkObjectId(token))
+      return socket.emit("user:error", {
+        error: "Token is required and must be an objectId.",
+      });
+
+    if (!checkRoomId(roomId))
+      return socket.emit("user:error", {
+        error: `RoomId is required and must be a ${process.env.ROOM_ID_LENGTH}-character long string.`,
+      });
+
     const db = await connectToDatabase();
     const room = await db.collection<Room>(roomCollection).findOne({ roomId });
 
@@ -410,18 +413,17 @@ export const lock = async (
   data: { token: string; roomId: string }
 ) => {
   const { token, roomId } = data;
-
-  if (!checkObjectId(token))
-    return socket.emit("user:error", {
-      error: "Token is required and must be an objectId.",
-    });
-
-  if (!checkRoomId(roomId))
-    return socket.emit("user:error", {
-      error: `RoomId is required and must be a ${process.env.ROOM_ID_LENGTH}-character long string.`,
-    });
-
   try {
+    if (!checkObjectId(token))
+      return socket.emit("user:error", {
+        error: "Token is required and must be an objectId.",
+      });
+
+    if (!checkRoomId(roomId))
+      return socket.emit("user:error", {
+        error: `RoomId is required and must be a ${process.env.ROOM_ID_LENGTH}-character long string.`,
+      });
+
     const db = await connectToDatabase();
     const room = await db.collection<Room>(roomCollection).findOne({ roomId });
 

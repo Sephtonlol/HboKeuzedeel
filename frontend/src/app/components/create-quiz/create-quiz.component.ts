@@ -104,12 +104,16 @@ export class CreateQuizComponent {
   async createQuiz() {
     console.log('Creating a quiz...');
 
+    const user = await this.apiService.getUser(
+      localStorage.getItem('authToken') || ''
+    );
+
     this.result = await this.apiService.createQuiz(
       {
         name: this.name,
         description: this.description,
         createdAt: new Date(),
-        createdBy: localStorage.getItem('username') || 'unknown',
+        createdBy: user.user.username,
         questions: this.questions,
       },
       localStorage.getItem('authToken') || ''

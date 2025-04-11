@@ -1,11 +1,11 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Quiz } from '../../interfaces/quiz.interface';
 import { ApiService } from '../../services/api.service';
 import { QuizComponent } from '../quiz/quiz.component';
 import { FormsModule } from '@angular/forms';
 import { Modal } from 'bootstrap';
 import { SocketService } from '../../services/socket.service';
-import { ObjectId } from 'mongodb';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-create-room',
@@ -14,7 +14,7 @@ import { ObjectId } from 'mongodb';
   templateUrl: './create-room.component.html',
   styleUrl: './create-room.component.css',
 })
-export class CreateRoomComponent {
+export class CreateRoomComponent implements OnInit {
   @ViewChild('quizzesModal') modalElement!: ElementRef;
   constructor(
     private apiService: ApiService,
@@ -28,6 +28,10 @@ export class CreateRoomComponent {
   quizzesModal!: Modal;
   showQuizzes: boolean = false;
   quizzes!: Quiz[];
+
+  private subscriptions: Subscription[] = [];
+  roomData: any;
+  errorMessage: string | null = null;
 
   ngAfterViewInit(): void {
     this.quizzesModal = new Modal(this.modalElement.nativeElement);
@@ -47,7 +51,33 @@ export class CreateRoomComponent {
     console.log(this.quiz);
     this.closeModal();
   }
-  createRoom() {
+  ngOnInit() {
+    this.subscriptions.push(
+      this.socketService.roomCreated.subscribe((data) => {
+        if (data) {
+          this.roomData = data;
+          console.log('Room created in component:', data);
+        }
+      })
+    );
+
+    this.subscriptions.push(
+      this.socketService.userErrors.subscribe((data) => {
+        if (data) {
+          console.error('User error:', data);
+          this.errorMessage = data.message || 'An error occurred.';
+        }
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+  }
+  async createRoom() {
+    const user = await this.apiService.getUser(
+      localStorage.getItem('authToken') || ''
+    );
     if (!this.roomName) console.error('Room name is required');
     if (!this.quiz) console.error('Quiz is required');
 
@@ -55,13 +85,23 @@ export class CreateRoomComponent {
     if (this.mode === 'team') {
       teams = 2;
     }
-    this.socketService.createRoom(
+    console.log(
       localStorage.getItem('authToken') || '',
-      localStorage.getItem('username') || '',
+      user.user.username,
       this.roomName,
       this.quiz._id as unknown as string,
       !this.private,
       { type: this.mode, teams: teams }
     );
+    this.socketService.createRoom(
+      localStorage.getItem('authToken') || '',
+      user.user.username,
+      this.roomName,
+      this.quiz._id as unknown as string,
+      !this.private,
+      { type: this.mode, teams: teams }
+    );
+
+    console.log('Creating room...');
   }
 }

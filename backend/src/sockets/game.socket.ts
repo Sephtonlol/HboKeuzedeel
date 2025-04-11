@@ -191,7 +191,7 @@ export const answerQuestion = async (
     participant.answers.push(answer);
 
     const questionIndex = participant.totalAnswers;
-    const currentQuestion = room.quiz?.questions[questionIndex];
+    const currentQuestion = room.quiz?.questions[questionIndex - 1];
 
     if (!currentQuestion)
       return socket.emit("user:error", { error: "Invalid question index." });

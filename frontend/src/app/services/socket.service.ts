@@ -10,10 +10,18 @@ import { Mode } from '../interfaces/rooms.interface';
 export class SocketService {
   private socket!: Socket;
 
+  // BehaviorSubjects for all socket events
   public roomUpdates = new BehaviorSubject<any>(null);
   public userErrors = new BehaviorSubject<any>(null);
   public quizProgress = new BehaviorSubject<any>(null);
   public questionAnswered = new BehaviorSubject<any>(null);
+  public userSuccess = new BehaviorSubject<any>(null);
+  public roomCreated = new BehaviorSubject<any>(null);
+  public roomJoined = new BehaviorSubject<any>(null);
+  public userKicked = new BehaviorSubject<any>(null);
+  public roomLocked = new BehaviorSubject<any>(null);
+  public showAnswerEvent = new BehaviorSubject<any>(null);
+  public showLeaderboardEvent = new BehaviorSubject<any>(null);
 
   constructor() {
     this.connect();
@@ -24,23 +32,21 @@ export class SocketService {
       transports: ['websocket'],
     });
 
-    // Handle events
-    this.socket.on('room:update', (data) => console.log('Room update:', data));
-    this.socket.on('user:error', (data) => console.log('Error:', data));
-    this.socket.on('user:success', (data) => console.log('Success:', data));
-    this.socket.on('room:create', (data) => console.log('Room Created:', data));
-    this.socket.on('room:join', (data) => console.log('Joined Room:', data));
-    this.socket.on('room:kick', (data) => console.log('Kicked:', data));
-    this.socket.on('room:lock', (data) => console.log('Room Locked:', data));
-    this.socket.on('show:answer', (data) => console.log('Show answer:', data));
-    this.socket.on('show:leaderboard', (data) =>
-      console.log('Show leaderboard:', data)
-    );
-    this.socket.on('quiz:progressed', (data) =>
-      console.log('Quiz progressed:', data)
-    );
+    // Handle socket events and push to corresponding BehaviorSubjects
+    this.socket.on('room:update', (data) => this.roomUpdates.next(data));
+    this.socket.on('user:error', (data) => this.userErrors.next(data));
+    this.socket.on('quiz:progressed', (data) => this.quizProgress.next(data));
     this.socket.on('question:answered', (data) =>
-      console.log('Question answered:', data)
+      this.questionAnswered.next(data)
+    );
+    this.socket.on('user:success', (data) => this.userSuccess.next(data));
+    this.socket.on('room:create', (data) => this.roomCreated.next(data));
+    this.socket.on('room:join', (data) => this.roomJoined.next(data));
+    this.socket.on('room:kick', (data) => this.userKicked.next(data));
+    this.socket.on('room:lock', (data) => this.roomLocked.next(data));
+    this.socket.on('show:answer', (data) => this.showAnswerEvent.next(data));
+    this.socket.on('show:leaderboard', (data) =>
+      this.showLeaderboardEvent.next(data)
     );
   }
 

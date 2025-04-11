@@ -20,13 +20,19 @@ export class LoginComponent implements OnInit {
     this.result = await this.apiService.login(this.email, this.password);
     if (!this.result.error) {
       localStorage.setItem('authToken', this.result.token);
-      localStorage.setItem('username', this.result.username);
       this.router.navigate(['/home']);
     }
     this.showToast();
   }
   async ngOnInit() {
     if (localStorage.getItem('authToken')) {
+      this.router.navigate(['/home']);
+      return;
+    }
+    const result = await this.apiService.getUser(
+      localStorage.getItem('authToken') || ''
+    );
+    if (result.user) {
       this.router.navigate(['/home']);
     }
   }

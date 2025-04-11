@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-header',
@@ -8,9 +9,9 @@ import { Router, RouterLink } from '@angular/router';
   styleUrl: './header.component.css',
 })
 export class HeaderComponent implements OnInit {
-  isLoggedIn: boolean = false;
+  loggedIn: boolean = false;
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private apiService: ApiService) {
     this.router.events.subscribe(() => {
       this.checkLoginStatus();
     });
@@ -18,16 +19,25 @@ export class HeaderComponent implements OnInit {
 
   logout() {
     localStorage.removeItem('authToken');
-    localStorage.removeItem('username');
-    this.isLoggedIn = false;
+    this.loggedIn = false;
     this.router.navigate(['/login']);
   }
 
-  ngOnInit(): void {
-    this.checkLoginStatus();
+  async ngOnInit(): Promise<void> {
+    await this.checkLoginStatus();
   }
 
-  private checkLoginStatus(): void {
-    this.isLoggedIn = !!localStorage.getItem('authToken');
+  private async checkLoginStatus(): Promise<void> {
+    if (!localStorage.getItem('authToken')) {
+      this.loggedIn = false;
+      return;
+    }
+    const result = await this.apiService.getUser(
+      localStorage.getItem('authToken') || ''
+    );
+    this.loggedIn = result.error ? false : true;
+    if (!this.loggedIn) {
+      localStorage.removeItem('authToken');
+    }
   }
 }
