@@ -1,9 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Quiz } from '../../interfaces/quiz.interface';
 import { ApiService } from '../../services/api.service';
-import { QuizComponent } from '../quiz/quiz.component';
 import { FormsModule } from '@angular/forms';
-import { Modal } from 'bootstrap';
 import { SocketService } from '../../services/socket.service';
 import { Subscription } from 'rxjs';
 import { ToastService } from '../../toast.service';
@@ -11,7 +9,7 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-create-room',
-  imports: [QuizComponent, FormsModule],
+  imports: [FormsModule],
   standalone: true,
   templateUrl: './create-room.component.html',
   styleUrl: './create-room.component.css',
@@ -29,8 +27,8 @@ export class CreateRoomComponent implements OnInit {
   teamsAmount: number | undefined = undefined;
   private: boolean = false;
   quiz!: Quiz;
+  quizIdError: string = '';
 
-  quizzesModal!: Modal;
   showQuizzes: boolean = false;
   quizzes!: Quiz[];
 
@@ -38,31 +36,6 @@ export class CreateRoomComponent implements OnInit {
   roomData: any;
   errorMessage: string | null = null;
 
-  ngAfterViewInit(): void {
-    this.quizzesModal = new Modal(this.modalElement.nativeElement);
-  }
-
-  async openModal(): Promise<void> {
-    if (!this.quizzes) {
-      const result = await this.apiService.getQuizzes();
-      if (!result) {
-        this.toastService.show({ error: 'Something went wrong.' });
-        return;
-      }
-      this.quizzes = result.quizzes;
-      this.quizzesModal.show();
-    }
-  }
-  closeModal(): void {
-    this.quizzesModal.hide();
-  }
-
-  selectQuiz(quiz: Quiz) {
-    this.quiz = quiz;
-    this.showQuizzes = false;
-    console.log(this.quiz);
-    this.closeModal();
-  }
   ngOnInit() {
     this.subscriptions.push(
       this.socketService.roomCreated.subscribe((data) => {
@@ -89,6 +62,19 @@ export class CreateRoomComponent implements OnInit {
 
   ngOnDestroy() {
     this.subscriptions.forEach((sub) => sub.unsubscribe());
+  }
+  async getQuiz(quizId: string) {
+    const isValidObjectId = /^[a-f\d]{24}$/i.test(quizId);
+
+    if (isValidObjectId) {
+      this.quizIdError = '';
+
+      this.quiz = (await this.apiService.getQuiz(quizId)) as Quiz;
+    } else {
+      this.quizIdError = 'Invalid Quiz ID.';
+    }
+
+    console.log(quizId);
   }
   async createRoom() {
     const user = await this.apiService.getUser(

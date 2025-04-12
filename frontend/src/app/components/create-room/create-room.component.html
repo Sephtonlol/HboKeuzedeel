@@ -102,36 +102,20 @@
       </div>
       }
     </div>
+    <div>
+      @if(quizIdError){
 
-    <button
-      type="button"
-      class="btn btn-primary select-quiz-button"
-      (click)="openModal()"
-    >
-      Select Quiz
-    </button>
-  </div>
-</div>
-
-<div #quizzesModal class="modal fade" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Select Quiz</h5>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-          aria-label="Close"
-        ></button>
-      </div>
-      <div class="modal-body">
-        <div class="quizzes">
-          @for(quiz of quizzes; track quiz._id){
-          <app-quiz [quiz]="quiz" (selected)="selectQuiz(quiz)" />
-          }
-        </div>
-      </div>
+      <small class="text-danger">{{ quizIdError }}</small>
+      }
+      <input
+        type="text"
+        class="form-control input-text room-name"
+        aria-label="Sizing example input"
+        aria-describedby="inputGroup-sizing-sm"
+        placeholder="Quiz ID"
+        #quizIdInput
+        (change)="getQuiz(quizIdInput.value)"
+      />
     </div>
   </div>
 </div>

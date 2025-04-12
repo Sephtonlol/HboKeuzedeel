@@ -115,7 +115,7 @@ export const createQuiz = async (req: Request, res: Response) => {
 
 export const getQuiz = async (req: Request, res: Response) => {
   const page = Number(req.query.page) || 1;
-  const { quizId } = req.body;
+  const quizId = req.query.quizId || "";
 
   try {
     const db = await connectToDatabase();

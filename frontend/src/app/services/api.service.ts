@@ -44,6 +44,18 @@ export class ApiService {
     }
   }
 
+  async getQuiz(quizId: string): Promise<Quiz | void> {
+    try {
+      const params = quizId ? { quizId: quizId } : undefined;
+
+      return await firstValueFrom(
+        this.http.get<Quiz>(`${this.apiUrl}/quiz`, { params })
+      );
+    } catch (error) {
+      console.error('Error fetching quiz:', error);
+    }
+  }
+
   async createQuiz(quiz: Quiz, token: string): Promise<any> {
     try {
       const headers = new HttpHeaders({
