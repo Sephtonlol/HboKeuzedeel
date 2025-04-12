@@ -1,0 +1,55 @@
+:host {
+  height: 100vh;
+}
+.lobby-header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.25rem;
+}
+.room-id {
+  text-transform: uppercase;
+}
+.lobby {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+.lobby-content {
+  padding: 0.25rem;
+  text-align: center;
+  h5 {
+    opacity: 0.8;
+  }
+}
+.participants {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 1rem;
+  height: 35%;
+  min-height: 200px;
+  width: 100%;
+  background-color: var(--secondary-color);
+}
+.participant {
+  border-radius: 6px;
+  margin: 0.5rem;
+  height: min-content;
+  padding: 0.75rem;
+  background-color: var(--primary-color);
+  position: relative;
+}
+.participant:hover .kick-icon {
+  opacity: 1;
+}
+.kick-icon {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  opacity: 0;
+  color: var(--white-color);
+  position: absolute;
+  right: 3px;
+  top: 0;
+}

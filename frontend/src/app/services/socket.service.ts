@@ -69,6 +69,7 @@ export class SocketService {
   }
 
   joinRoom(name: string, roomId: string, team?: number) {
+    console.log({ name, roomId, team });
     this.socket.emit('room:join', { name, roomId, team });
   }
 

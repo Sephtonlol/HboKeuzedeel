@@ -1,0 +1,61 @@
+<div
+  class="-container"
+  [style.width]="room.mode?.type === 'team' ? '90%' : 'unset'"
+>
+  <div class="form">
+    <div class="inputs">
+      <input
+        type="text"
+        class="form-control input-text"
+        aria-label="Sizing example input"
+        aria-describedby="inputGroup-sizing-sm"
+        placeholder="Nickname"
+        [(ngModel)]="username"
+      />
+      @if(room.mode?.type == "team"){
+
+      <select
+        class="form-control"
+        id="exampleFormControlSelect1"
+        [(ngModel)]="selectedTeam"
+      >
+        <option disabled [value]="undefined">Select Team</option>
+        @for(team of teams; track team){
+        <option [value]="team">{{ team + 1 }}</option>
+
+        }
+      </select>
+      }
+    </div>
+    <button
+      class="btn btn-primary play-button"
+      [class.disabled]="
+        !username || (room.mode?.type == 'team' && selectedTeam == undefined)
+      "
+      (click)="joinRoom()"
+    >
+      Play
+    </button>
+  </div>
+  @if(room.mode?.type == "team"){
+
+  <div class="teams">
+    @for (team of teamsArray; track team) {
+    <div class="team">
+      <h4>Team {{ $index + 1 }}</h4>
+      <div class="participants">
+        @for (member of team; track member.name) {
+        <div class="participant">
+          <span>{{ member.name }}</span>
+        </div>
+        } @if(team.length < 1){
+        <div class="participant">
+          <span>No one</span>
+        </div>
+        }
+      </div>
+    </div>
+    }
+  </div>
+  }
+</div>

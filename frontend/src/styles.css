@@ -17,6 +17,7 @@ span,
 p,
 input,
 textarea,
+select,
 button {
   margin: 0.2rem;
   font-family: condensed;

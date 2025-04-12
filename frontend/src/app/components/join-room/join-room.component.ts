@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { ApiService } from '../../services/api.service';
+import { ToastService } from '../../toast.service';
 
 @Component({
   selector: 'app-join-room',
@@ -9,13 +12,21 @@ import { FormsModule } from '@angular/forms';
 })
 export class JoinRoomComponent {
   roomId: string = '';
-  username: string = '';
+  constructor(
+    private router: Router,
+    private apiService: ApiService,
+    private toastService: ToastService
+  ) {}
 
-  joinRoom() {
-    if (this.roomId && this.username) {
-      console.log('Joining room:', this.roomId, 'as', this.username);
-    } else {
+  async joinRoom() {
+    if (!this.roomId) {
       console.error('Please enter a room code and username.');
+    }
+    try {
+      const result = await this.apiService.getRooms(this.roomId);
+      if (!(result as any).error) this.router.navigate(['/join', this.roomId]);
+    } catch {
+      this.toastService.show({ error: 'Room not found.' });
     }
   }
 }

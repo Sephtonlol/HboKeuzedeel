@@ -9,6 +9,7 @@
   flex-direction: column;
   gap: 2rem;
   width: 100%;
+  align-items: center;
 }
 .search,
 .quizzes-container {

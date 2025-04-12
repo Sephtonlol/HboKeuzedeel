@@ -65,10 +65,11 @@ export const create = async (
 
     if (
       mode.type === "team" &&
-      (typeof mode.teams !== "number" || mode.teams < 2)
+      (typeof mode.teams !== "number" || mode.teams < 2 || mode.teams > 10)
     ) {
+      console.log(mode.teams);
       return socket.emit("user:error", {
-        error: "Mode teams must be a number greater than 1.",
+        error: "Mode teams must be a number between 2 & 10",
       });
     }
 
@@ -111,6 +112,7 @@ export const create = async (
       correctAnswers: 0,
       totalAnswers: 0,
       answers: [],
+      team: 0,
     };
 
     const newRoom: Room = {
@@ -174,7 +176,10 @@ export const join = async (
         error: "Room has already started the quiz.",
       });
 
-    if (team || typeof team !== "number")
+    if (
+      room.mode?.type === "team" &&
+      ((!team && team !== 0) || typeof team !== "number")
+    )
       return socket.emit("user:error", {
         error: "Team is required and must be of type number.",
       });
@@ -223,10 +228,10 @@ export const join = async (
     });
 
     socket.to(roomId).emit("room:update", {
-      participants: sanitizedRoom.participants,
+      room: sanitizedRoom,
     });
     return socket.emit("room:update", {
-      participants: sanitizedRoom.participants,
+      room: sanitizedRoom,
     });
   } catch (error) {
     console.error(error);
@@ -344,10 +349,10 @@ export const leave = async (
       .collection(roomCollection)
       .updateOne({ roomId }, { $set: { participants: updatedParticipants } });
     socket.to(roomId).emit("room:update", {
-      participants: sanitizeRoom({
+      room: sanitizeRoom({
         ...room,
         participants: updatedParticipants,
-      }).participants,
+      }),
     });
     socket.leave(roomId);
     return socket.emit("user:success", {
@@ -385,6 +390,9 @@ export const reconnect = async (
         error: "Room participants not found.",
       });
 
+    let host = false;
+    if (room.host.toString() === token) host = true;
+
     const isValidToken = room.participants.some(
       (participant) => participant.token?.toString() === token
     );
@@ -399,7 +407,8 @@ export const reconnect = async (
     socket.join(roomId);
     return socket.emit("room:update", {
       message: "Successfully reconnected to room.",
-      participants: sanitizedRoom.participants,
+      room: sanitizedRoom,
+      host,
     });
   } catch (error) {
     return socket.emit("user:error", {

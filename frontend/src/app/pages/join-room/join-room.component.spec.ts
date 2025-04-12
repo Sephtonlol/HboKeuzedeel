@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { QuizComponent } from './quiz.component';
+import { JoinRoomComponent } from './join-room.component';
 
-describe('QuizComponent', () => {
-  let component: QuizComponent;
-  let fixture: ComponentFixture<QuizComponent>;
+describe('JoinRoomComponent', () => {
+  let component: JoinRoomComponent;
+  let fixture: ComponentFixture<JoinRoomComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [QuizComponent]
+      imports: [JoinRoomComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(QuizComponent);
+    fixture = TestBed.createComponent(JoinRoomComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

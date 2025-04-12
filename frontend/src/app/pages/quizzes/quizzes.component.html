@@ -1,22 +1,5 @@
 <div class="content">
   <div class="input-group search">
-    <button
-      class="btn btn-outline-secondary dropdown-toggle"
-      type="button"
-      data-bs-toggle="dropdown"
-      aria-expanded="false"
-    >
-      {{ selectedQuery }}
-    </button>
-    <ul class="dropdown-menu">
-      <li>
-        <a class="dropdown-item" (click)="changeQuery('All')">All</a>
-      </li>
-      <li><a class="dropdown-item" (click)="changeQuery('Name')">Name</a></li>
-      <li>
-        <a class="dropdown-item" (click)="changeQuery('Author')">Author</a>
-      </li>
-    </ul>
     <input
       type="text"
       class="form-control"
@@ -41,4 +24,14 @@
     </div>
     }
   </div>
+  <nav aria-label="Page navigation example">
+    <ul class="pagination">
+      @for(page of paginationArray; track page){
+
+      <li class="page-item" [class.active]="this.page == page.toString()">
+        <a class="page-link" [routerLink]="['/quizzes', page]">{{ page }}</a>
+      </li>
+      }
+    </ul>
+  </nav>
 </div>

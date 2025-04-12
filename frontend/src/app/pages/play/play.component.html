@@ -1,1 +1,28 @@
-<p>play works!</p>
+@if(room.quizProgression == 0){
+<div class="lobby">
+  <div class="lobby-header">
+    <h1>{{ room.name }}</h1>
+    <h1 class="room-id">Room ID: {{ room.roomId }}</h1>
+  </div>
+
+  <div class="lobby-content">
+    <h2>
+      {{ room.quiz?.name }}
+    </h2>
+    <h5>Waiting for host to start the quiz...</h5>
+  </div>
+
+  <div class="participants">
+    @for( participant of room.participants; track participant){
+    <div class="participant">
+      <h3>
+        {{ participant.name }}
+      </h3>
+      @if(host){
+      <i class="bi bi-x-square kick-icon" (click)="kick(participant.name)"></i>
+      }
+    </div>
+    }
+  </div>
+</div>
+}

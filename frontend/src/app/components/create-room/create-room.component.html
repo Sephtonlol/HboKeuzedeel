@@ -48,6 +48,25 @@
           ><h6>CO-OP</h6>
         </label>
       </div>
+      @if(mode == "team"){
+
+      <select
+        class="form-control"
+        id="exampleFormControlSelect1"
+        [(ngModel)]="teamsAmount"
+      >
+        <option disabled [value]="undefined">Select Team Amount</option>
+        <option [value]="2">2</option>
+        <option [value]="3">3</option>
+        <option [value]="4">4</option>
+        <option [value]="5">5</option>
+        <option [value]="6">6</option>
+        <option [value]="7">7</option>
+        <option [value]="8">8</option>
+        <option [value]="9">9</option>
+        <option [value]="10">10</option>
+      </select>
+      }
       <div class="bottom">
         <div class="form-check">
           <input
@@ -62,7 +81,9 @@
         </div>
         <button
           class="btn btn-primary play-button"
-          [class.disabled]="!quiz || !roomName"
+          [class.disabled]="
+            !quiz || !roomName || (mode == 'team' && teamsAmount == null)
+          "
           (click)="createRoom()"
         >
           Play

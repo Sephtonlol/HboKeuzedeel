@@ -53,6 +53,9 @@
   margin-top: 0.75rem;
   width: 100%;
 }
+select {
+  margin: 0.4rem 0;
+}
 @media (max-width: 768px) {
   .-container {
     flex-direction: column;

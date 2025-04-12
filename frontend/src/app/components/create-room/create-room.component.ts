@@ -7,6 +7,7 @@ import { Modal } from 'bootstrap';
 import { SocketService } from '../../services/socket.service';
 import { Subscription } from 'rxjs';
 import { ToastService } from '../../toast.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-create-room',
@@ -19,10 +20,13 @@ export class CreateRoomComponent implements OnInit {
   @ViewChild('quizzesModal') modalElement!: ElementRef;
   constructor(
     private apiService: ApiService,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private toastService: ToastService,
+    private router: Router
   ) {}
   roomName!: string;
   mode: 'ffa' | 'team' | 'coop' = 'ffa';
+  teamsAmount: number | undefined = undefined;
   private: boolean = false;
   quiz!: Quiz;
 
@@ -39,8 +43,15 @@ export class CreateRoomComponent implements OnInit {
   }
 
   async openModal(): Promise<void> {
-    if (!this.quizzes) this.quizzes = await this.apiService.getQuizzes();
-    this.quizzesModal.show();
+    if (!this.quizzes) {
+      const result = await this.apiService.getQuizzes();
+      if (!result) {
+        this.toastService.show({ error: 'Something went wrong.' });
+        return;
+      }
+      this.quizzes = result.quizzes;
+      this.quizzesModal.show();
+    }
   }
   closeModal(): void {
     this.quizzesModal.hide();
@@ -57,7 +68,10 @@ export class CreateRoomComponent implements OnInit {
       this.socketService.roomCreated.subscribe((data) => {
         if (data) {
           this.roomData = data;
-          console.log('Room created in component:', data);
+          localStorage.setItem('roomToken', data.token);
+          localStorage.setItem('roomId', data.roomId);
+          this.router.navigate(['/play']);
+          this.toastService.show(data);
         }
       })
     );
@@ -67,6 +81,7 @@ export class CreateRoomComponent implements OnInit {
         if (data) {
           console.error('User error:', data);
           this.errorMessage = data.message || 'An error occurred.';
+          this.toastService.show(data);
         }
       })
     );
@@ -81,18 +96,30 @@ export class CreateRoomComponent implements OnInit {
     );
     if (!this.roomName) console.error('Room name is required');
     if (!this.quiz) console.error('Quiz is required');
+    if (this.mode == 'team' && !this.teamsAmount)
+      console.error('Quiz is required');
 
     let teams: undefined | number = undefined;
     if (this.mode === 'team') {
       teams = 2;
     }
-    this.socketService.createRoom(
-      localStorage.getItem('authToken') || '',
-      user.user.username,
-      this.roomName,
-      this.quiz._id as unknown as string,
-      !this.private,
-      { type: this.mode, teams: teams }
-    );
+    if (this.mode == 'team')
+      this.socketService.createRoom(
+        localStorage.getItem('authToken') || '',
+        user.user.username,
+        this.roomName,
+        this.quiz._id as unknown as string,
+        !this.private,
+        { type: this.mode, teams: Number(this.teamsAmount) }
+      );
+    else
+      this.socketService.createRoom(
+        localStorage.getItem('authToken') || '',
+        user.user.username,
+        this.roomName,
+        this.quiz._id as unknown as string,
+        !this.private,
+        { type: this.mode }
+      );
   }
 }

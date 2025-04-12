@@ -11,7 +11,7 @@ import { checkRoomId } from "../utils/types.utils";
 const roomCollection = "rooms";
 
 export const getRoom = async (req: Request, res: Response) => {
-  const { roomId } = req.body;
+  const roomId = req.query.roomId;
 
   try {
     const db = await connectToDatabase();

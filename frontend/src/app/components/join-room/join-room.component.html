@@ -5,23 +5,15 @@
       class="form-control input-text"
       aria-label="Sizing example input"
       aria-describedby="inputGroup-sizing-sm"
-      placeholder="Username"
-      [(ngModel)]="username"
-    />
-    <input
-      type="text"
-      class="form-control input-text"
-      aria-label="Sizing example input"
-      aria-describedby="inputGroup-sizing-sm"
       placeholder="Room ID"
       [(ngModel)]="roomId"
     />
   </div>
   <button
     class="btn btn-primary play-button"
-    [class.disabled]="!roomId || !username"
+    [class.disabled]="!roomId"
     (click)="joinRoom()"
   >
-    Play
+    Next
   </button>
 </div>

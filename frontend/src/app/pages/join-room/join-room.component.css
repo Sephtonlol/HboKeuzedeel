@@ -1,0 +1,67 @@
+:host {
+  display: flex;
+  justify-content: center;
+}
+
+.-container {
+  display: flex;
+  justify-content: space-between;
+  width: 90%;
+  gap: 2rem;
+}
+
+.form,
+.teams {
+  height: min-content;
+  background-color: var(--secondary-color);
+  border-radius: 6px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.teams {
+  min-width: 250px;
+  gap: 1rem;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  flex: 1;
+}
+.inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.175rem;
+}
+button {
+  width: 100%;
+}
+.participants {
+  display: flex;
+  flex-wrap: wrap;
+}
+.team {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.participant {
+  opacity: 0.8;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--primary-color);
+  border-radius: 6px;
+  margin: 0.25rem;
+}
+@media (max-width: 576px) {
+  .-container {
+    width: 90%;
+    flex-direction: column;
+  }
+  .teams {
+    max-width: 100%;
+    justify-content: center;
+  }
+  .participant {
+    width: 100%;
+  }
+}

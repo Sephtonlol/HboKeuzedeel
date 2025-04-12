@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Quiz } from '../../interfaces/quiz.interface';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-quiz',
@@ -7,11 +8,15 @@ import { Quiz } from '../../interfaces/quiz.interface';
   templateUrl: './quiz.component.html',
   styleUrl: './quiz.component.css',
 })
-export class QuizComponent {
+export class QuizComponent implements OnInit {
+  constructor(private router: Router) {}
+
   @Input() quiz!: Quiz;
 
   showQuestions: boolean = false;
   copied: boolean = false;
+
+  route!: string;
 
   @Output() selected = new EventEmitter<void>();
   toggleQuestions() {
@@ -29,5 +34,8 @@ export class QuizComponent {
   }
   selectQuiz() {
     this.selected.emit();
+  }
+  ngOnInit(): void {
+    this.route = this.router.url;
   }
 }
