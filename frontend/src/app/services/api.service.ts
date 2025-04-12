@@ -56,6 +56,18 @@ export class ApiService {
     }
   }
 
+  async searchQuizzes(search: string): Promise<Quiz[] | void> {
+    try {
+      const params = search ? { search: search } : undefined;
+
+      return await firstValueFrom(
+        this.http.get<Quiz[]>(`${this.apiUrl}/quizSearch`, { params })
+      );
+    } catch (error) {
+      console.error('Error searching quizzes:', error);
+    }
+  }
+
   async createQuiz(quiz: Quiz, token: string): Promise<any> {
     try {
       const headers = new HttpHeaders({

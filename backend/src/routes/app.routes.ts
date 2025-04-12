@@ -1,6 +1,10 @@
 import { Router, Request, Response } from "express";
 import { getRoom } from "../controllers/room.controller";
-import { createQuiz, getQuiz } from "../controllers/quiz.controller";
+import {
+  createQuiz,
+  getQuiz,
+  searchQuizzes,
+} from "../controllers/quiz.controller";
 import { login, register, user } from "../controllers/account.controller";
 
 const router = Router();
@@ -15,6 +19,10 @@ router.post("/quiz", (req: Request, res: Response) => {
 
 router.get("/quiz", (req: Request, res: Response) => {
   getQuiz(req, res);
+});
+
+router.get("/quizSearch", (req: Request, res: Response) => {
+  searchQuizzes(req, res);
 });
 
 router.post("/login", (req: Request, res: Response) => {

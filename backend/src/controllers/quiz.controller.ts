@@ -162,3 +162,33 @@ export const getQuiz = async (req: Request, res: Response) => {
     return res.status(500).json({ error: "Failed to fetch quiz." });
   }
 };
+
+export const searchQuizzes = async (req: Request, res: Response) => {
+  const search = req.query.search as string;
+  try {
+    if (!checkString(search))
+      return res.status(422).json({
+        error: "Search is required and must be a non-empty string.",
+      });
+
+    if (search.length < 3)
+      return res.status(422).json({
+        error: "Search must have a length of atleast 3 characters.",
+      });
+
+    const db = await connectToDatabase();
+
+    const fetchedQuizzes = await db
+      .collection<Quiz>(quizCollection)
+      .find({ name: { $regex: new RegExp(search, "i") } })
+      .toArray();
+
+    if (!fetchedQuizzes.length)
+      return res.status(404).json({ error: "No Quizzes found." });
+
+    return res.json(sanitizeQuizzes(fetchedQuizzes));
+  } catch (error) {
+    console.error("Error searching quizzes:", error);
+    return res.status(500).json({ error: "Failed to searching quizzes." });
+  }
+};

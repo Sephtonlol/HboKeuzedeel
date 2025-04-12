@@ -24,9 +24,15 @@ export class QuizzesComponent implements OnInit {
   page!: string | null;
   searchInput: string = '';
   paginationArray: number[] = [];
+  searched: boolean = false;
 
-  search() {
-    console.log(this.searchInput);
+  async search() {
+    this.quizzes = (await this.apiService.searchQuizzes(
+      this.searchInput
+    )) as Quiz[];
+    this.searched = true;
+    if (this.quizzes == undefined)
+      this.toastService.show({ error: 'No quizzes found.' });
   }
   async getQuizzes() {
     this.page = this.route.snapshot.paramMap.get('page');
@@ -36,7 +42,7 @@ export class QuizzesComponent implements OnInit {
     }
     const result = await this.apiService.getQuizzes(this.page);
     if (!result) {
-      this.toastService.show({ error: 'Something went wrong.' });
+      this.toastService.show({ error: 'No Quizzes found.' });
       return;
     }
     this.quizzes = result.quizzes;
@@ -45,6 +51,7 @@ export class QuizzesComponent implements OnInit {
       { length: this.maxPage || 0 },
       (_, i) => i + 1
     );
+    this.searched = false;
   }
   async ngOnInit(): Promise<void> {
     this.route.paramMap.subscribe(async () => {

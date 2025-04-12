@@ -1,5 +1,16 @@
 <div class="content">
   <div class="input-group search">
+    @if(searched){
+
+    <button
+      class="btn btn-outline-secondary"
+      type="button"
+      id="button-addon1"
+      (click)="getQuizzes()"
+    >
+      <i class="bi bi-x"></i>
+    </button>
+    }
     <input
       type="text"
       class="form-control"
@@ -11,7 +22,7 @@
       type="button"
       class="btn btn-secondary"
       (click)="search()"
-      [class.disabled]="!searchInput"
+      [class.disabled]="searchInput.length < 3"
     >
       Search
     </button>
@@ -22,9 +33,13 @@
     <div class="quiz-card">
       <app-quiz [quiz]="quiz"></app-quiz>
     </div>
+    } @if(quizzes == undefined){
+    <h3>No Results</h3>
     }
   </div>
-  <nav aria-label="Page navigation example">
+  @if(!searched){
+
+  <nav aria-label="Page navigation">
     <ul class="pagination">
       @for(page of paginationArray; track page){
 
@@ -34,4 +49,5 @@
       }
     </ul>
   </nav>
+  }
 </div>
