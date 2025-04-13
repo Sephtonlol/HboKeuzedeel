@@ -23,8 +23,9 @@ export class JoinRoomComponent {
       console.error('Please enter a room code and username.');
     }
     try {
-      const result = await this.apiService.getRooms(this.roomId);
-      if (!(result as any).error) this.router.navigate(['/join', this.roomId]);
+      const result = await this.apiService.getRooms(this.roomId.toLowerCase());
+      if (!(result as any).error)
+        this.router.navigate(['/join', this.roomId.toLowerCase()]);
     } catch {
       this.toastService.show({ error: 'Room not found.' });
     }

@@ -23,6 +23,7 @@ export class JoinRoomComponent implements OnInit {
   private subscriptions: Subscription[] = [];
   roomData: any;
   errorMessage: string | null = null;
+  loggedIn: boolean = false;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -31,6 +32,12 @@ export class JoinRoomComponent implements OnInit {
     private socketService: SocketService
   ) {}
   async ngOnInit(): Promise<void> {
+    const authToken = localStorage.getItem('authToken');
+    if (authToken) {
+      this.loggedIn = true;
+      const result = await this.apiService.getUser(authToken);
+      this.username = result.user.username;
+    }
     const roomId = this.route.snapshot.paramMap.get('roomId');
     this.room = (await this.apiService.getRooms(roomId as string)) as Room;
     console.log(this.room);
