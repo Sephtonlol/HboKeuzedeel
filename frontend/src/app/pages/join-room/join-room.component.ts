@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 import { ToastService } from '../../toast.service';
 import { SocketService } from '../../services/socket.service';
@@ -13,7 +13,7 @@ import { Subscription } from 'rxjs';
   templateUrl: './join-room.component.html',
   styleUrl: './join-room.component.css',
 })
-export class JoinRoomComponent implements OnInit {
+export class JoinRoomComponent implements OnInit, OnDestroy {
   room!: Room;
   username: string = '';
   selectedTeam: number | undefined = undefined;
@@ -31,6 +31,7 @@ export class JoinRoomComponent implements OnInit {
     private toastService: ToastService,
     private socketService: SocketService
   ) {}
+
   async ngOnInit(): Promise<void> {
     const authToken = localStorage.getItem('authToken');
     if (authToken) {
@@ -105,5 +106,6 @@ export class JoinRoomComponent implements OnInit {
     } else {
       this.socketService.joinRoom(this.username, this.room.roomId);
     }
+    return;
   }
 }

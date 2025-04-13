@@ -1,4 +1,10 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { Quiz } from '../../interfaces/quiz.interface';
 import { ApiService } from '../../services/api.service';
 import { FormsModule } from '@angular/forms';
@@ -14,7 +20,7 @@ import { Router } from '@angular/router';
   templateUrl: './create-room.component.html',
   styleUrl: './create-room.component.css',
 })
-export class CreateRoomComponent implements OnInit {
+export class CreateRoomComponent implements OnInit, OnDestroy {
   @ViewChild('quizzesModal') modalElement!: ElementRef;
   constructor(
     private apiService: ApiService,
@@ -52,7 +58,6 @@ export class CreateRoomComponent implements OnInit {
     this.subscriptions.push(
       this.socketService.userErrors.subscribe((data) => {
         if (data) {
-          console.error('User error:', data);
           this.errorMessage = data.message || 'An error occurred.';
           this.toastService.show(data);
         }
@@ -107,5 +112,6 @@ export class CreateRoomComponent implements OnInit {
         !this.private,
         { type: this.mode }
       );
+    return;
   }
 }

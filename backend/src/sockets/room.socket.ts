@@ -270,9 +270,18 @@ export const kick = async (
         error: "Only the host can kick participants.",
       });
 
-    const sanitizedRoom = sanitizeRoom(room);
-    const updatedParticipants = sanitizedRoom.participants.filter(
-      (participant: Participant) => !compare(participant.name, kick)
+    let removedParticipant: Participant | undefined;
+    let found = false;
+
+    const updatedParticipants = room.participants?.filter(
+      (participant: Participant) => {
+        if (!found && compare(participant.name, kick)) {
+          removedParticipant = participant;
+          found = true;
+          return false;
+        }
+        return true;
+      }
     );
 
     if (!room.participants)
@@ -280,20 +289,28 @@ export const kick = async (
         error: "Room participants not found.",
       });
 
-    if (updatedParticipants.length === room.participants.length)
+    if (updatedParticipants?.length === room.participants.length)
       return socket.emit("user:error", {
         error: "Participant not found or already removed.",
       });
+
+    room.participants = updatedParticipants;
 
     await db
       .collection(roomCollection)
       .updateOne({ roomId }, { $set: { participants: updatedParticipants } });
 
     socket.emit("room:kick", {
-      participant: kick,
+      participant: removedParticipant?.token,
     });
-    return socket.to(roomId).emit("room:kick", {
-      participant: kick,
+    socket.to(roomId).emit("room:kick", {
+      participant: removedParticipant?.token,
+    });
+    socket.emit("room:update", {
+      room: sanitizeRoom(room),
+    });
+    return socket.to(roomId).emit("room:update", {
+      room: sanitizeRoom(room),
     });
   } catch (error) {
     console.error(error);
@@ -329,9 +346,10 @@ export const leave = async (
         error: "Room participants not found.",
       });
 
-    const updatedParticipants = room.participants.filter(
-      (participant: Participant) => participant.token?.toString() !== token
-    );
+    const updatedParticipants =
+      room.participants?.filter(
+        (participant: Participant) => participant.token?.toString() !== token
+      ) || [];
 
     if (updatedParticipants.length === room.participants.length)
       return socket.emit("user:error", {

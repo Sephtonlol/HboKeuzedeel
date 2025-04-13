@@ -28,7 +28,6 @@ export class PlayComponent implements OnInit {
   kick(user: string) {
     if (!this.token || !this.roomId)
       this.toastService.show({ error: 'User or room ID are empty.' });
-
     this.socketService.kickUser(this.token!, user, this.roomId!);
   }
 
@@ -56,7 +55,8 @@ export class PlayComponent implements OnInit {
         if (data) {
           console.log('Room update:', data);
           this.room = data.room;
-          this.host = data.host;
+          console.log(data.room.participants);
+          if (data.host) this.host = data.host;
         }
       })
     );
@@ -89,8 +89,16 @@ export class PlayComponent implements OnInit {
     this.subscriptions.push(
       this.socketService.userKicked.subscribe((data) => {
         if (data) {
-          console.warn('User kicked:', data);
-          this.toastService.show(data);
+          console.log('User kicked:', data);
+          if (data.participant) if (data.u) this.toastService.show(data);
+          if (data.participant == this.token) {
+            this.toastService.show({
+              message: 'You have been kicked from the room.',
+            });
+            localStorage.removeItem('roomToken');
+            localStorage.removeItem('roomId');
+            this.router.navigate(['/home']);
+          }
         }
       })
     );
@@ -98,7 +106,7 @@ export class PlayComponent implements OnInit {
     this.subscriptions.push(
       this.socketService.roomLocked.subscribe((data) => {
         if (data) {
-          console.log('Room locked:', data);
+          console.log('Room locked event:', data);
         }
       })
     );
