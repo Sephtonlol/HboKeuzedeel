@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 import { ToastService } from '../../toast.service';
 import { SocketService } from '../../services/socket.service';
@@ -13,7 +13,7 @@ import { Subscription } from 'rxjs';
   templateUrl: './join-room.component.html',
   styleUrl: './join-room.component.css',
 })
-export class JoinRoomComponent implements OnInit, OnDestroy {
+export class JoinRoomComponent implements OnInit {
   room!: Room;
   username: string = '';
   selectedTeam: number | undefined = undefined;
@@ -33,6 +33,14 @@ export class JoinRoomComponent implements OnInit, OnDestroy {
   ) {}
 
   async ngOnInit(): Promise<void> {
+    if (!sessionStorage.getItem('reloaded')) {
+      sessionStorage.setItem('reloaded', 'true');
+      window.location.reload();
+      return;
+    } else {
+      sessionStorage.removeItem('reloaded');
+    }
+
     const authToken = localStorage.getItem('authToken');
     if (authToken) {
       this.loggedIn = true;
@@ -41,7 +49,6 @@ export class JoinRoomComponent implements OnInit, OnDestroy {
     }
     const roomId = this.route.snapshot.paramMap.get('roomId');
     this.room = (await this.apiService.getRooms(roomId as string)) as Room;
-    console.log(this.room);
     if (!this.room) {
       this.toastService.show({ error: 'Something went wrong.' });
       this.router.navigate(['/home']);
@@ -77,6 +84,7 @@ export class JoinRoomComponent implements OnInit, OnDestroy {
           this.roomData = data;
           localStorage.setItem('roomToken', data.token);
           localStorage.setItem('roomId', data.roomId);
+          this.subscriptions.forEach((sub) => sub.unsubscribe());
           this.router.navigate(['/play']);
           this.toastService.show(data);
         }
@@ -93,9 +101,7 @@ export class JoinRoomComponent implements OnInit, OnDestroy {
       })
     );
   }
-  ngOnDestroy() {
-    this.subscriptions.forEach((sub) => sub.unsubscribe());
-  }
+
   async joinRoom() {
     if (this.room.mode?.type == 'team') {
       this.socketService.joinRoom(

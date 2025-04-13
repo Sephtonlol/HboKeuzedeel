@@ -9,6 +9,7 @@ import { CreateRoomComponent } from '../../components/create-room/create-room.co
 import { CreateQuizComponent } from '../../components/create-quiz/create-quiz.component';
 import { JoinRoomComponent } from '../../components/join-room/join-room.component';
 import { ApiService } from '../../services/api.service';
+import { SocketService } from '../../services/socket.service';
 
 @Component({
   selector: 'app-home',
@@ -37,6 +38,12 @@ export class HomeComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
+    sessionStorage.clear();
+    localStorage.removeItem('roomToken');
+    localStorage.removeItem('roomId');
+    this.loggedIn = false;
+    this.selectedTab = 'joinRoom';
+
     const result = await this.apiService.getUser(
       localStorage.getItem('authToken') || ''
     );

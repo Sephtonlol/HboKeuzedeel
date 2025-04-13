@@ -32,6 +32,9 @@ export class PlayComponent implements OnInit, AfterViewInit {
   room!: Room;
   host: boolean = false;
   errorMessage: string | null = null;
+
+  locked: boolean = false;
+
   constructor(
     private socketService: SocketService,
     private router: Router,
@@ -39,9 +42,32 @@ export class PlayComponent implements OnInit, AfterViewInit {
   ) {}
 
   kick(user: string) {
-    if (!this.token || !this.roomId)
+    if (!this.token || !this.roomId) {
       this.toastService.show({ error: 'User or room ID are empty.' });
-    this.socketService.kickUser(this.token!, user, this.roomId!);
+      return;
+    }
+    this.socketService.kickUser(this.token, user, this.roomId);
+  }
+  leave() {
+    if (!this.token || !this.roomId) {
+      this.toastService.show({ error: 'User or room ID are empty.' });
+      return;
+    }
+    this.socketService.leaveRoom(this.token, this.roomId);
+  }
+  lock() {
+    if (!this.token || !this.roomId) {
+      this.toastService.show({ error: 'User or room ID are empty.' });
+      return;
+    }
+    this.socketService.lockRoom(this.token, this.roomId);
+  }
+
+  progress() {
+    if (!this.token || !this.roomId) {
+      this.toastService.show({ error: 'User or room ID are empty.' });
+      return;
+    }
   }
 
   private generateQRCode(): void {
@@ -59,6 +85,7 @@ export class PlayComponent implements OnInit, AfterViewInit {
       }
     );
   }
+
   ngAfterViewInit(): void {
     this.generateQRCode();
   }
@@ -73,7 +100,7 @@ export class PlayComponent implements OnInit, AfterViewInit {
         if (data) {
           this.errorMessage = data.message || 'An error occurred.';
           this.toastService.show(data);
-          if (data.error == 'Invalid token.') {
+          if (data.error == 'Invalid token.' || 'Room not found.') {
             localStorage.removeItem('roomToken');
             localStorage.removeItem('roomId');
             this.router.navigate(['/home']);
@@ -85,10 +112,63 @@ export class PlayComponent implements OnInit, AfterViewInit {
     this.subscriptions.push(
       this.socketService.roomUpdates.subscribe((data) => {
         if (data) {
-          console.log('Room update:', data);
           this.room = data.room;
-          console.log(data.room.participants);
           if (data.host) this.host = data.host;
+          this.locked = this.room.locked;
+        }
+      })
+    );
+
+    this.subscriptions.push(
+      this.socketService.userSuccess.subscribe((data) => {
+        if (data) {
+          console.log('User success:', data);
+          this.toastService.show(data);
+
+          if (data.message == 'Successfully left the room.') {
+            this.socketService.disconnect();
+            this.subscriptions.forEach((sub) => sub.unsubscribe());
+            this.router.navigate(['/home']);
+          }
+        }
+      })
+    );
+
+    this.subscriptions.push(
+      this.socketService.userKicked.subscribe((data) => {
+        if (data) {
+          if (data.participant) if (data.u) this.toastService.show(data);
+          if (data.participant == this.token || 'all') {
+            if (data.participant == 'all')
+              this.toastService.show({
+                message: 'Room has been destroyed',
+              });
+            else
+              this.toastService.show({
+                message: 'You have been kicked from the room.',
+              });
+            localStorage.removeItem('roomToken');
+            localStorage.removeItem('roomId');
+            this.socketService.disconnect();
+            this.subscriptions.forEach((sub) => sub.unsubscribe());
+            this.router.navigate(['/home']);
+          }
+        }
+      })
+    );
+
+    this.subscriptions.push(
+      this.socketService.roomLocked.subscribe((data) => {
+        if (data) {
+          this.locked = data.lock;
+        }
+      })
+    );
+
+    this.subscriptions.push(
+      this.socketService.showAnswerEvent.subscribe((data) => {
+        if (data) {
+          console.log('Show answer event:', data);
         }
       })
     );
@@ -105,48 +185,6 @@ export class PlayComponent implements OnInit, AfterViewInit {
       this.socketService.questionAnswered.subscribe((data) => {
         if (data) {
           console.log('Question answered:', data);
-        }
-      })
-    );
-
-    this.subscriptions.push(
-      this.socketService.userSuccess.subscribe((data) => {
-        if (data) {
-          console.log('User success:', data);
-          this.toastService.show(data);
-        }
-      })
-    );
-
-    this.subscriptions.push(
-      this.socketService.userKicked.subscribe((data) => {
-        if (data) {
-          console.log('User kicked:', data);
-          if (data.participant) if (data.u) this.toastService.show(data);
-          if (data.participant == this.token) {
-            this.toastService.show({
-              message: 'You have been kicked from the room.',
-            });
-            localStorage.removeItem('roomToken');
-            localStorage.removeItem('roomId');
-            this.router.navigate(['/home']);
-          }
-        }
-      })
-    );
-
-    this.subscriptions.push(
-      this.socketService.roomLocked.subscribe((data) => {
-        if (data) {
-          console.log('Room locked event:', data);
-        }
-      })
-    );
-
-    this.subscriptions.push(
-      this.socketService.showAnswerEvent.subscribe((data) => {
-        if (data) {
-          console.log('Show answer event:', data);
         }
       })
     );

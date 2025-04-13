@@ -78,8 +78,6 @@ export class CreateRoomComponent implements OnInit, OnDestroy {
     } else {
       this.quizIdError = 'Invalid Quiz ID.';
     }
-
-    console.log(quizId);
   }
   async createRoom() {
     const user = await this.apiService.getUser(

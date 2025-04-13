@@ -1,5 +1,6 @@
 :host {
   height: 100vh;
+  position: relative;
 }
 .lobby-header {
   display: flex;
@@ -42,17 +43,14 @@
   border-radius: 6px;
   margin: 0.5rem;
   height: min-content;
-  padding: 0.75rem;
+  padding: 0.75rem 1.25rem;
   background-color: var(--primary-color);
   position: relative;
 }
-.participant:hover .kick-icon {
-  opacity: 1;
-}
+
 .kick-icon {
   cursor: pointer;
   transition: opacity 0.2s ease;
-  opacity: 0;
   color: var(--white-color);
   position: absolute;
   right: 3px;
@@ -69,6 +67,14 @@ canvas {
   h2 {
     display: none;
   }
+}
+
+.hud {
+  position: absolute;
+  bottom: 37.5%;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
 }
 @media (max-width: 576px) {
   canvas {

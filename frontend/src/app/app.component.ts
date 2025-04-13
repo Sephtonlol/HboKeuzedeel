@@ -29,7 +29,7 @@ export class AppComponent {
       this.toastMessage = message;
       this.toastType = type || '';
       this.toastShow = true;
-      setTimeout(() => (this.toastShow = false), 3000);
+      setTimeout(() => (this.toastShow = false), 2000);
     });
   }
 }

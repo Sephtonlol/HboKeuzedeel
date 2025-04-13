@@ -1,11 +1,33 @@
+<div class="hud">
+  <div class="left">
+    <button
+      type="button"
+      class="btn btn-secondary"
+      (click)="lock()"
+      [disabled]="!host"
+    >
+      @if(locked){ <i class="bi bi-lock-fill"></i>} @else {
+      <i class="bi bi-unlock-fill"></i>
+      }
+    </button>
+    <button type="button" class="btn btn-danger" (click)="leave()">
+      <span> Quit </span>
+    </button>
+  </div>
+  @if(host){
+  <button type="button" class="btn btn-primary" (click)="progress()">
+    <span> Next </span>
+  </button>
+  }
+</div>
 @if(room.quizProgression == 0){
 <div class="lobby">
   <div class="lobby-header">
     <h1>{{ room.name }}</h1>
     <div class="lobby-header-inner">
       <div class="lobby-header-inner-inner">
-        <h1 class="room-id">Room ID: {{ room.roomId }}</h1>
         <h2>{{ room.name }}</h2>
+        <h1 class="room-id">Room ID: {{ room.roomId }}</h1>
       </div>
       <canvas #qrCanvas></canvas>
     </div>
