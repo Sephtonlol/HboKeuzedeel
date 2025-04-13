@@ -1,12 +1,7 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import {
-  MultipleChoiceAnswer,
-  OpenAnswer,
-  Question,
-  YesNoAnswer,
-} from '../../interfaces/quiz.interface';
-import { Modal, Toast } from 'bootstrap';
+import { Answer, Question } from '../../interfaces/quiz.interface';
+import { Modal } from 'bootstrap';
 import { ApiService } from '../../services/api.service';
 import { ToastService } from '../../toast.service';
 
@@ -50,7 +45,7 @@ export class CreateQuizComponent {
   getAnswersByQuestionType(
     type: 'yes_no' | 'multiple_choice' | 'open' = 'yes_no'
   ) {
-    let answers: YesNoAnswer | MultipleChoiceAnswer | OpenAnswer;
+    let answers: Answer;
     switch (type) {
       case 'yes_no':
         answers = { options: [''], correctAnswer: false };
@@ -83,7 +78,7 @@ export class CreateQuizComponent {
   }
 
   addMultipleChoiceField(index: number) {
-    const question = this.questions[index].answers as MultipleChoiceAnswer;
+    const question = this.questions[index].answers;
     if (question.options.length >= 8) {
       return;
     }
@@ -91,7 +86,7 @@ export class CreateQuizComponent {
   }
 
   removeMultipleChoiceField(index: number) {
-    const question = this.questions[index].answers as MultipleChoiceAnswer;
+    const question = this.questions[index].answers;
     if (question.options.length <= 1) {
       return;
     }
@@ -101,7 +96,7 @@ export class CreateQuizComponent {
   getMultipleChoiceOptions(index: number): string[] {
     const answer = this.questions[index].answers;
     return this.questions[index].type === 'multiple_choice'
-      ? (answer as MultipleChoiceAnswer).options || []
+      ? answer.options || []
       : [];
   }
 

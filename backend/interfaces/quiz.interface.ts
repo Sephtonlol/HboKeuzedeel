@@ -15,19 +15,7 @@ export interface Question {
   answers: Answer;
 }
 
-export type Answer = YesNoAnswer | MultipleChoiceAnswer | OpenAnswer;
-
-export interface YesNoAnswer {
+export interface Answer {
   options: string[];
-  correctAnswer: boolean;
-}
-
-export interface MultipleChoiceAnswer {
-  options: string[];
-  correctAnswer: string;
-}
-
-export interface OpenAnswer {
-  options: string[];
-  correctAnswer: string;
+  correctAnswer: string | boolean;
 }
