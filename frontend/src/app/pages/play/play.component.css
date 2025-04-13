@@ -7,6 +7,11 @@
   width: 100%;
   padding: 0.25rem;
 }
+
+.lobby-header-inner {
+  display: flex;
+  gap: 1rem;
+}
 .room-id {
   text-transform: uppercase;
 }
@@ -52,4 +57,35 @@
   position: absolute;
   right: 3px;
   top: 0;
+}
+canvas {
+  max-height: 150px;
+  max-width: 150px;
+}
+.lobby-header-inner-inner {
+  display: flex;
+  flex-direction: column;
+  text-align: end;
+  h2 {
+    display: none;
+  }
+}
+@media (max-width: 576px) {
+  canvas {
+    max-width: 100px;
+    max-height: 100px;
+  }
+  .lobby-header-inner-inner {
+    text-align: start;
+    h2 {
+      display: block;
+    }
+  }
+  .lobby-header-inner {
+    justify-content: space-between;
+    width: 100%;
+  }
+  .lobby-header > h1 {
+    display: none;
+  }
 }

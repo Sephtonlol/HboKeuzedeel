@@ -1,9 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { SocketService } from '../../services/socket.service';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ToastService } from '../../toast.service';
 import { Room } from '../../interfaces/rooms.interface';
+
+import QRCode from 'qrcode';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-play',
@@ -11,11 +20,15 @@ import { Room } from '../../interfaces/rooms.interface';
   templateUrl: './play.component.html',
   styleUrl: './play.component.css',
 })
-export class PlayComponent implements OnInit {
+export class PlayComponent implements OnInit, AfterViewInit {
   token!: string | null;
   roomId!: string | null;
 
+  @ViewChild('qrCanvas', { static: false })
+  qrCanvas!: ElementRef<HTMLCanvasElement>;
+
   private subscriptions: Subscription[] = [];
+
   room!: Room;
   host: boolean = false;
   errorMessage: string | null = null;
@@ -29,6 +42,25 @@ export class PlayComponent implements OnInit {
     if (!this.token || !this.roomId)
       this.toastService.show({ error: 'User or room ID are empty.' });
     this.socketService.kickUser(this.token!, user, this.roomId!);
+  }
+
+  private generateQRCode(): void {
+    if (!this.roomId) return;
+
+    QRCode.toCanvas(
+      this.qrCanvas.nativeElement,
+      `${environment.baseUrl}/join/${this.roomId}`,
+      {
+        errorCorrectionLevel: 'H',
+        scale: 10,
+      },
+      (err) => {
+        if (err) console.error(err);
+      }
+    );
+  }
+  ngAfterViewInit(): void {
+    this.generateQRCode();
   }
 
   ngOnInit(): void {
