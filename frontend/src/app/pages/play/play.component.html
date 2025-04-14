@@ -1,8 +1,10 @@
 <div class="hud">
   <div class="left">
+    @if(room && room.quizProgression === 0){
+
     <button
       type="button"
-      class="btn btn-secondary"
+      class="btn btn-lg btn-secondary"
       (click)="lock()"
       [disabled]="!host"
     >
@@ -10,38 +12,49 @@
       <i class="bi bi-unlock-fill"></i>
       }
     </button>
-    <button type="button" class="btn btn-danger" (click)="leave()">
+    }
+    <button type="button" class="btn btn-lg btn-danger" (click)="leave()">
       <span> Quit </span>
     </button>
   </div>
-  @if(host){
-  <button type="button" class="btn btn-primary" (click)="progress()">
+  @if(room && room.state == "question" &&( participantsAnswered ||
+  participantsAnswered == 0)){
+  <h3>{{ participantsAnswered }}/{{ room.participants?.length }} Answers</h3>
+  } @if(host){
+  <button type="button" class="btn btn-lg btn-primary" (click)="next()">
+    <span> Next </span>
+  </button>
+  }@else {
+  <button type="button" class="btn btn-lg btn-primary opacity">
     <span> Next </span>
   </button>
   }
 </div>
-@if(room.quizProgression == 0){
-<div class="lobby">
+<div
+  class="lobby"
+  [style.display]="room && room.quizProgression === 0 ? 'flex' : 'none'"
+>
   <div class="lobby-header">
+    @if(room){
     <h1>{{ room.name }}</h1>
+    }
     <div class="lobby-header-inner">
       <div class="lobby-header-inner-inner">
-        <h2>{{ room.name }}</h2>
+        @if(room ){
         <h1 class="room-id">Room ID: {{ room.roomId }}</h1>
+        <h2>{{ room.name }}</h2>
+        }
       </div>
       <canvas #qrCanvas></canvas>
     </div>
   </div>
 
   <div class="lobby-content">
-    <h2>
-      {{ room.quiz?.name }}
-    </h2>
     <h5>Waiting for host to start the quiz...</h5>
   </div>
 
   <div class="participants">
-    @for( participant of room.participants; track participant){
+    @if(room){ @for( participant of room.participants; track participant){
     <div class="participant">
       <h3>
         {{ participant.name }}
@@ -50,7 +63,214 @@
       <i class="bi bi-x-square kick-icon" (click)="kick(participant.name)"></i>
       }
     </div>
+    } }
+  </div>
+</div>
+@if(room && (room.state == "question" || !room.state)){ @if(!yourAnswer){
+
+<div class="question">
+  <div class="question-header">
+    @if(question){
+    <h1>
+      {{ question.name }}
+    </h1>
+    }
+  </div>
+  <div class="question-footer">
+    @if(question ){ @if(question.type == "yes_no"){
+
+    <div class="btn-group btn-group-lg yes-no-container" role="group">
+      <button
+        type="button"
+        class="btn btn-success yes-no-button"
+        (click)="answer(true)"
+      >
+        <h1>Yes</h1>
+      </button>
+      <button
+        type="button"
+        class="btn btn-danger yes-no-button"
+        (click)="answer(false)"
+      >
+        <h1>No</h1>
+      </button>
+    </div>
+    } @else if(question.type == "multiple_choice"){
+    <div class="multiple-choice-container">
+      @for(optionsInner of options; track optionsInner; let outerIndex =
+      $index){ @for(option of optionsInner; track option; let innerIndex =
+      $index){
+      <button
+        type="button"
+        class="btn btn-lg multiple-choice-button"
+        [ngClass]="'color-' + outerIndex + innerIndex"
+        [class.single-button]="optionsInner.length == 1"
+        (click)="answer(option)"
+      >
+        <h2>
+          {{ option }}
+        </h2>
+      </button>
+      } }
+    </div>
+    }@else {
+    <div class="open-container">
+      <textarea
+        #test
+        oninput="this.style.height='auto';this.style.height=this.scrollHeight + 'px'"
+        rows="1"
+        id="auto-textarea"
+        class="auto-expand-textarea form-control open-input"
+        placeholder="Your Answer..."
+      ></textarea>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="answer(test.value)"
+      >
+        <h2>Submit</h2>
+      </button>
+    </div>
+    } }
+  </div>
+</div>
+}@else {
+<div class="waiting-container">
+  @if(participantsAnswered == room.participants?.length ){
+  <h4>Waiting On The Host...</h4>
+  }@else{
+  <h4>Waiting For Others To Answer...</h4>
+  }
+</div>
+} }@if(room && room.state == "answer"){
+<div class="answer-container">
+  <div class="answer-content">
+    @if(correct){
+    <i class="bi bi-check-circle answer-icon"></i>
+    <h3>Correct</h3>
+    } @else{
+    <i class="bi bi-x-circle answer-icon"></i>
+    <h3>Incorrect</h3>
     }
   </div>
 </div>
+
+} @if(room && room.state == "statistics"){
+<div class="statistic-container">
+  @if(questionType == "yes_no"|| questionType == "multiple_choice"){
+
+  <div class="statistic-content-desktop">
+    @for(statistic of statistics; track statistic; let statsIndex = $index){
+    <div class="statistic-item">
+      <div class="statistic-item-header">
+        @if(statistic.answer == correctAnswer.toString()){
+        <h1>
+          <i class="bi bi-check"></i>
+        </h1>
+        }
+        <h3>
+          {{ statistic.count }}
+        </h3>
+      </div>
+      @if(questionType == "yes_no"){
+      <div
+        class="statistic-bar"
+        [style.backgroundColor]="
+          statistic.answer === 'true' ? '#198754' : '#dc3545'
+        "
+        [style.height]="statistic.percentage + '%'"
+      ></div>
+      }@else {
+      <div
+        class="statistic-bar"
+        [ngClass]="'color-' + statsIndex"
+        [style.height]="statistic.percentage + '%'"
+      ></div>
+      }
+    </div>
+    }
+  </div>
+
+  <div class="statistic-content-mobile">
+    @for(statistic of statistics; track statistic; let statsIndex = $index){
+    <div class="statistic-item">
+      <div class="statistic-item-header">
+        @if(statistic.answer == correctAnswer.toString()){
+        <h1>
+          <i class="bi bi-check"></i>
+        </h1>
+        }
+        <h3>
+          {{ statistic.count }}
+        </h3>
+      </div>
+      @if(questionType == "yes_no"){
+      <div
+        class="statistic-bar"
+        [style.backgroundColor]="
+          statistic.answer === 'true' ? '#198754' : '#dc3545'
+        "
+        [style.width]="statistic.percentage + '%'"
+      ></div>
+      }@else {
+      <div
+        class="statistic-bar"
+        [ngClass]="'color-' + statsIndex"
+        [style.width]="statistic.percentage + '%'"
+      ></div>
+      }
+    </div>
+    }
+  </div>
+  <div class="button-disabled"></div>
+  <div class="question-footer">
+    @if(question ){ @if(question.type == "yes_no"){
+
+    <div class="btn-group btn-group-lg yes-no-container" role="group">
+      <button type="button" class="btn btn-success yes-no-button">
+        <h1>Yes</h1>
+      </button>
+      <button type="button" class="btn btn-danger yes-no-button">
+        <h1>No</h1>
+      </button>
+    </div>
+    } @else if(question.type == "multiple_choice"){
+    <div class="multiple-choice-container">
+      @for(optionsInner of options; track optionsInner; let outerIndex =
+      $index){ @for(option of optionsInner; track option; let innerIndex =
+      $index){
+      <button
+        type="button"
+        class="btn btn-lg multiple-choice-button"
+        [ngClass]="'color-' + outerIndex + innerIndex"
+        [class.single-button]="optionsInner.length == 1"
+      >
+        <h2>
+          {{ option }}
+        </h2>
+      </button>
+      } }
+    </div>
+    } }
+  </div>
+  }@else {
+
+  <div class="statistic-content-open">
+    @for(statistic of statistics; track statistic; let statsIndex = $index){
+    <div class="statistic-item-open">
+      <h2>
+        {{ statistic.answer }}
+      </h2>
+      @if (isCorrectAnswer(statistic.answer, correctAnswer)) {
+      <h1>
+        <i class="bi bi-check"></i>
+      </h1>
+      }
+    </div>
+    }
+  </div>
+  }
+</div>
+}@if(room && room.state == "leaderboard"){
+<h1>leaderboard</h1>
 }

@@ -28,11 +28,23 @@ export const register = async (req: Request, res: Response) => {
   try {
     const db = await connectToDatabase();
 
-    const existing = await db
+    const usernameExist = await db
       .collection(userCollection)
       .findOne({ "user.username": username });
 
-    if (existing) return res.status(419).json({ error: "User already exists" });
+    const emailExist = await db
+      .collection(userCollection)
+      .findOne({ "user.email": email });
+
+    if (usernameExist)
+      return res
+        .status(419)
+        .json({ error: "User with that name already exists" });
+
+    if (emailExist)
+      return res
+        .status(419)
+        .json({ error: "User with that email already exists" });
 
     const hash = await bcrypt.hash(password, 10);
     const user: User = {
@@ -99,7 +111,8 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const verifyToken = async (
-  authHeader: string | undefined
+  authHeader: string | undefined,
+  get: boolean = false
 ): Promise<any> => {
   try {
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -112,6 +125,9 @@ export const verifyToken = async (
     const result = await db.collection(userCollection).findOne({
       "user.token": token,
     });
+    if (get) {
+      return token;
+    }
 
     if (!result) {
       return false;

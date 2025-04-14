@@ -25,6 +25,11 @@ export class AppComponent {
   }
 
   ngOnInit() {
+    const roomToken = localStorage.getItem('roomToken');
+    const roomId = localStorage.getItem('roomId');
+    if (roomToken && roomId) {
+      this.router.navigate(['/play']);
+    }
     this.toastService.toastState$.subscribe(({ message, type }) => {
       this.toastMessage = message;
       this.toastType = type || '';

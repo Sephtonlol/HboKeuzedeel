@@ -13,6 +13,7 @@ export interface Room {
   quiz?: Quiz;
   mode?: Mode;
   hostName?: string;
+  state?: "question" | "answer" | "statistics" | "leaderboard";
 }
 
 export interface Mode {

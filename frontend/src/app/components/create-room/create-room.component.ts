@@ -43,6 +43,8 @@ export class CreateRoomComponent implements OnInit, OnDestroy {
   errorMessage: string | null = null;
 
   ngOnInit() {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+
     this.subscriptions.push(
       this.socketService.roomCreated.subscribe((data) => {
         if (data) {
@@ -67,6 +69,7 @@ export class CreateRoomComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscriptions.forEach((sub) => sub.unsubscribe());
+    this.socketService.disconnect();
   }
   async getQuiz(quizId: string) {
     const isValidObjectId = /^[a-f\d]{24}$/i.test(quizId);
@@ -92,6 +95,7 @@ export class CreateRoomComponent implements OnInit, OnDestroy {
     if (this.mode === 'team') {
       teams = 2;
     }
+
     if (this.mode == 'team')
       this.socketService.createRoom(
         localStorage.getItem('authToken') || '',

@@ -7,6 +7,7 @@ import Rand from "rand-seed";
 import { cleanString, compare } from "../utils/comparisons.utils";
 import { checkObjectId, checkRoomId, checkString } from "../utils/types.utils";
 import { sanitizeQuiz, sanitizeRoom } from "../utils/sanitize.utils";
+import { stat } from "fs";
 
 const quizCollection = "quizzes";
 const roomCollection = "rooms";
@@ -221,6 +222,8 @@ export const join = async (
 
     sanitizedRoom.quiz = sanitizeQuiz(sanitizedRoom.quiz);
 
+    sanitizedRoom.quiz = undefined;
+
     socket.emit("room:join", {
       message: "Successfully joined the room.",
       roomId: roomId,
@@ -306,11 +309,16 @@ export const kick = async (
     socket.to(roomId).emit("room:kick", {
       participant: removedParticipant?.token,
     });
+
+    const sanitizedRoom = sanitizeRoom(room);
+
+    sanitizedRoom.quiz = undefined;
+
     socket.emit("room:update", {
-      room: sanitizeRoom(room),
+      room: sanitizedRoom,
     });
     return socket.to(roomId).emit("room:update", {
-      room: sanitizeRoom(room),
+      room: sanitizedRoom,
     });
   } catch (error) {
     console.error(error);
@@ -363,14 +371,17 @@ export const leave = async (
       return socket.emit("room:kick", { participant: "all" });
     }
     // Update the room with the participant removed
+    const sanitizedRoom = sanitizeRoom(room);
+
+    sanitizedRoom.quiz = undefined;
     await db
       .collection(roomCollection)
       .updateOne({ roomId }, { $set: { participants: updatedParticipants } });
     socket.to(roomId).emit("room:update", {
-      room: sanitizeRoom({
-        ...room,
+      room: {
+        ...sanitizedRoom,
         participants: updatedParticipants,
-      }),
+      },
     });
     socket.leave(roomId);
     return socket.emit("user:success", {
@@ -420,13 +431,69 @@ export const reconnect = async (
 
     const sanitizedRoom = sanitizeRoom(room);
 
-    sanitizedRoom.quiz = sanitizeQuiz(sanitizedRoom.quiz);
+    const quiz = sanitizeQuiz(room.quiz as Quiz);
+
+    sanitizedRoom.quiz = undefined;
+
+    sanitizedRoom.participants.forEach((participant: any) => {
+      participant.answers = undefined;
+      participant.correctAnswers = undefined;
+      participant.score = undefined;
+    });
+
+    let answerStats = undefined;
+    let correctAnswer = undefined;
+
+    const currentQuestion = room.quiz?.questions[room.quizProgression - 1];
+    const questionType = currentQuestion?.type;
+
+    if (room.state === "statistics") {
+      const currentQuestion =
+        room.quiz?.questions[room.quizProgression - 1].answers;
+
+      const answerCountMap: Record<string, number> = {};
+
+      if (questionType === "multiple_choice") {
+        currentQuestion?.options.forEach((option) => {
+          answerCountMap[option] = 0;
+        });
+      } else if (questionType === "yes_no") {
+        answerCountMap["true"] = 0;
+        answerCountMap["false"] = 0;
+      }
+
+      room.participants?.forEach((participant) => {
+        const lastAnswer = participant.answers.at(-1);
+        if (!lastAnswer) return;
+
+        if (questionType === "multiple_choice" || questionType === "yes_no") {
+          if (answerCountMap.hasOwnProperty(lastAnswer)) {
+            answerCountMap[lastAnswer]++;
+          }
+        } else {
+          answerCountMap[lastAnswer] = (answerCountMap[lastAnswer] || 0) + 1;
+        }
+      });
+
+      answerStats = Object.entries(answerCountMap).map(([answer, count]) => ({
+        answer,
+        count,
+      }));
+    }
+
+    if (room.state == "answer" || room.state == "statistics")
+      correctAnswer =
+        room.quiz?.questions[room.quizProgression - 1].answers.correctAnswer;
 
     socket.join(roomId);
     return socket.emit("room:update", {
-      message: "Successfully reconnected to room.",
-      room: sanitizedRoom,
       host,
+      room: sanitizedRoom,
+      question: quiz?.questions[room.quizProgression - 1],
+      quizLength: room.quiz?.questions.length,
+      stats: answerStats,
+      questionType,
+      correctAnswer,
     });
   } catch (error) {
     return socket.emit("user:error", {

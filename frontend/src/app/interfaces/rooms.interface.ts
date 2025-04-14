@@ -12,6 +12,8 @@ export interface Room {
   locked: boolean;
   quiz?: Quiz;
   mode?: Mode;
+  hostName?: string;
+  state?: 'question' | 'answer' | 'statistics' | 'leaderboard';
 }
 
 export interface SimpleRoom {

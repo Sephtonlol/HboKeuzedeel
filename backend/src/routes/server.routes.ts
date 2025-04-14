@@ -12,6 +12,7 @@ import {
   progressGame,
   showAnswer,
   showLeaderboard,
+  showStatistics,
 } from "../sockets/game.socket";
 
 export default function socketRoutes(io: Server) {
@@ -51,6 +52,10 @@ export default function socketRoutes(io: Server) {
 
     socket.on("show:answer", async (data) => {
       showAnswer(socket, data);
+    });
+
+    socket.on("show:statistics", async (data) => {
+      showStatistics(socket, data);
     });
 
     socket.on("show:leaderboard", async (data) => {

@@ -7,9 +7,10 @@ import { sanitizeQuiz, sanitizeQuizzes } from "../utils/sanitize.utils";
 import { verifyToken } from "./account.controller";
 
 const quizCollection = "quizzes";
+const userCollection = "users";
 
 export const createQuiz = async (req: Request, res: Response) => {
-  const { name, createdBy, createdAt, description, questions } = req.body;
+  const { name, description, questions } = req.body;
   try {
     const db = await connectToDatabase();
 
@@ -99,6 +100,12 @@ export const createQuiz = async (req: Request, res: Response) => {
             .json({ error: `Question ${index + 1} has an invalid type.` });
       }
     }
+    const createdAt = new Date();
+    const resultUser = await db.collection(userCollection).findOne({
+      "user.token": verifyToken(req.headers.authorization, true),
+    });
+
+    const createdBy = resultUser?.username;
 
     const quiz: Quiz = { name, description, createdAt, createdBy, questions };
 

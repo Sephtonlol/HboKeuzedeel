@@ -20,8 +20,9 @@ export class SocketService {
   public roomJoined = new BehaviorSubject<any>(null);
   public userKicked = new BehaviorSubject<any>(null);
   public roomLocked = new BehaviorSubject<any>(null);
-  public showAnswerEvent = new BehaviorSubject<any>(null);
-  public showLeaderboardEvent = new BehaviorSubject<any>(null);
+  public quizAnswer = new BehaviorSubject<any>(null);
+  public quizStatistics = new BehaviorSubject<any>(null);
+  public quizLeaderboard = new BehaviorSubject<any>(null);
 
   constructor() {
     this.connect();
@@ -44,9 +45,10 @@ export class SocketService {
     this.socket.on('room:join', (data) => this.roomJoined.next(data));
     this.socket.on('room:kick', (data) => this.userKicked.next(data));
     this.socket.on('room:lock', (data) => this.roomLocked.next(data));
-    this.socket.on('show:answer', (data) => this.showAnswerEvent.next(data));
-    this.socket.on('show:leaderboard', (data) =>
-      this.showLeaderboardEvent.next(data)
+    this.socket.on('quiz:answer', (data) => this.quizAnswer.next(data));
+    this.socket.on('quiz:statistics', (data) => this.quizStatistics.next(data));
+    this.socket.on('quiz:leaderboard', (data) =>
+      this.quizLeaderboard.next(data)
     );
   }
 
@@ -87,6 +89,10 @@ export class SocketService {
 
   lockRoom(token: string, roomId: string) {
     this.socket.emit('room:lock', { token, roomId });
+  }
+
+  showStatistics(token: string, roomId: string) {
+    this.socket.emit('show:statistics', { token, roomId });
   }
 
   showLeaderboard(token: string, roomId: string) {
