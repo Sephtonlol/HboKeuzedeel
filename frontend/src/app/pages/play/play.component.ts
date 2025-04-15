@@ -8,7 +8,7 @@ import {
 import { SocketService } from '../../services/socket.service';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { ToastService } from '../../toast.service';
+import { ToastService } from '../../services/toast.service';
 import { Participant, Room } from '../../interfaces/rooms.interface';
 
 import QRCode from 'qrcode';
@@ -254,6 +254,7 @@ export class PlayComponent implements OnInit, AfterViewInit {
           this.toastService.show(data);
 
           if (data.message == 'Successfully left the room.') {
+            this.socketService.removeAllListeners();
             this.socketService.disconnect();
             this.subscriptions.forEach((sub) => sub.unsubscribe());
             this.router.navigate(['/home']);
@@ -277,6 +278,7 @@ export class PlayComponent implements OnInit, AfterViewInit {
               });
             localStorage.removeItem('roomToken');
             localStorage.removeItem('roomId');
+            this.socketService.removeAllListeners();
             this.socketService.disconnect();
             this.subscriptions.forEach((sub) => sub.unsubscribe());
             this.router.navigate(['/home']);

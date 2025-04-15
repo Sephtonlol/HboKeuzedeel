@@ -114,4 +114,7 @@ export class SocketService {
   disconnect() {
     this.socket.disconnect();
   }
+  removeAllListeners() {
+    this.socket.removeAllListeners();
+  }
 }

@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Answer, Question } from '../../interfaces/quiz.interface';
 import { Modal } from 'bootstrap';
 import { ApiService } from '../../services/api.service';
-import { ToastService } from '../../toast.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-create-quiz',

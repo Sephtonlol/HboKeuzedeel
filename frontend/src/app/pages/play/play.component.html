@@ -108,7 +108,8 @@
     } }
   </div>
 </div>
-@if(room && (room.state == "question" || !room.state)){ @if(!yourAnswer){
+@if(room && room.quizProgression > 0 && (room.state == "question" ||
+!room.state)){ @if(!yourAnswer){
 
 <div class="question">
   <div class="question-header">

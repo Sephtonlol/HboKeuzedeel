@@ -37,6 +37,13 @@ export class HomeComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
+    if (!sessionStorage.getItem('reloaded')) {
+      sessionStorage.setItem('reloaded', 'true');
+      window.location.reload();
+      return;
+    } else {
+      sessionStorage.removeItem('reloaded');
+    }
     const result = await this.apiService.getUser(
       localStorage.getItem('authToken') || ''
     );

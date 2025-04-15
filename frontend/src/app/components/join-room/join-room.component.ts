@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
-import { ToastService } from '../../toast.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-join-room',

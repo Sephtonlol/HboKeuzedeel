@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
-import { Toast } from 'bootstrap';
-import { ToastService } from '../../toast.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-register',

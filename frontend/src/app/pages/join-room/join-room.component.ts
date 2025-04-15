@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../services/api.service';
-import { ToastService } from '../../toast.service';
+import { ToastService } from '../../services/toast.service';
 import { SocketService } from '../../services/socket.service';
 import { Participant, Room } from '../../interfaces/rooms.interface';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -40,7 +40,6 @@ export class JoinRoomComponent implements OnInit {
     } else {
       sessionStorage.removeItem('reloaded');
     }
-
     const authToken = localStorage.getItem('authToken');
     if (authToken) {
       this.loggedIn = true;

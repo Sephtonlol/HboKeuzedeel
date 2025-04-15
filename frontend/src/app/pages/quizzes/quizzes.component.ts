@@ -4,7 +4,7 @@ import { ApiService } from '../../services/api.service';
 import { Quiz } from '../../interfaces/quiz.interface';
 import { QuizComponent } from '../../components/quiz/quiz.component';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ToastService } from '../../toast.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-quizzes',

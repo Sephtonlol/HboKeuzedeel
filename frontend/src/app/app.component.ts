@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { HeaderComponent } from './components/header/header.component';
-import { ToastService } from './toast.service';
+import { ToastService } from './services/toast.service';
 import { filter } from 'rxjs/operators';
 
 @Component({

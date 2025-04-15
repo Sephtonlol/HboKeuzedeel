@@ -10,7 +10,7 @@ import { ApiService } from '../../services/api.service';
 import { FormsModule } from '@angular/forms';
 import { SocketService } from '../../services/socket.service';
 import { Subscription } from 'rxjs';
-import { ToastService } from '../../toast.service';
+import { ToastService } from '../../services/toast.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -51,6 +51,9 @@ export class CreateRoomComponent implements OnInit, OnDestroy {
           this.roomData = data;
           localStorage.setItem('roomToken', data.token);
           localStorage.setItem('roomId', data.roomId);
+          this.socketService.removeAllListeners();
+          this.socketService.disconnect();
+          this.subscriptions.forEach((sub) => sub.unsubscribe());
           this.router.navigate(['/play']);
           this.toastService.show(data);
         }
@@ -68,8 +71,7 @@ export class CreateRoomComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach((sub) => sub.unsubscribe());
-    this.socketService.disconnect();
+    console.log('yes');
   }
   async getQuiz(quizId: string) {
     const isValidObjectId = /^[a-f\d]{24}$/i.test(quizId);
