@@ -7,7 +7,6 @@ import Rand from "rand-seed";
 import { cleanString, compare } from "../utils/comparisons.utils";
 import { checkObjectId, checkRoomId, checkString } from "../utils/types.utils";
 import { sanitizeQuiz, sanitizeRoom } from "../utils/sanitize.utils";
-import { stat } from "fs";
 
 const quizCollection = "quizzes";
 const roomCollection = "rooms";
@@ -86,10 +85,17 @@ export const create = async (
     if (!quiz)
       return socket.emit("user:error", { error: "Could not find quiz." });
 
+    const questions = quiz.questions;
+
+    for (let i = questions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [questions[i], questions[j]] = [questions[j], questions[i]];
+    }
+
     const typedQuiz: Quiz = {
       _id: quiz._id,
       name: quiz.name,
-      questions: quiz.questions,
+      questions: questions,
     };
 
     const rooms = await db.collection("rooms").find().toArray();
