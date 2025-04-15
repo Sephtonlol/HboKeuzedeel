@@ -172,7 +172,7 @@
     @for(statistic of statistics; track statistic; let statsIndex = $index){
     <div class="statistic-item">
       <div class="statistic-item-header">
-        @if(statistic.answer == correctAnswer.toString()){
+        @if(isCorrectAnswer(statistic.answer, correctAnswer)){
         <h1>
           <i class="bi bi-check"></i>
         </h1>
@@ -204,7 +204,7 @@
     @for(statistic of statistics; track statistic; let statsIndex = $index){
     <div class="statistic-item">
       <div class="statistic-item-header">
-        @if(statistic.answer == correctAnswer.toString()){
+        @if(isCorrectAnswer(statistic.answer, correctAnswer)){
         <h1>
           <i class="bi bi-check"></i>
         </h1>
@@ -283,7 +283,8 @@
 }@if(room && room.state == "leaderboard"){
 <div class="leaderboard-container">
   <div class="leaderboard-header"><h1>Leaderboard</h1></div>
-  @for(participant of leaderboard; track participant){
+  @for(participant of leaderboard; track participant){ @if($index < 9){
+
   <div class="leaderboard-content">
     <div class="leaderboard-item-outer">
       <div class="leaderboard-item">
@@ -302,6 +303,6 @@
       <div class="divider"></div>
     </div>
   </div>
-  }
+  } }
 </div>
 }
