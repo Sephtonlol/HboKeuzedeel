@@ -213,6 +213,10 @@
         <h1>
           <i class="bi bi-check"></i>
         </h1>
+        }@else {
+        <h1 class="incorrect-icon">
+          <i class="bi bi-x"></i>
+        </h1>
         }
         <h3>
           {{ statistic.count }}
@@ -244,6 +248,10 @@
         @if(isCorrectAnswer(statistic.answer, correctAnswer)){
         <h1>
           <i class="bi bi-check"></i>
+        </h1>
+        }@else {
+        <h1 class="incorrect-icon">
+          <i class="bi bi-x"></i>
         </h1>
         }
         <h3>
@@ -302,18 +310,20 @@
   }@else {
 
   <div class="statistic-content-open">
-    @for(statistic of statistics; track statistic; let statsIndex = $index){
-    <div class="statistic-item-open">
-      <h2>
-        {{ statistic.answer }}
-      </h2>
-      @if (isCorrectAnswer(statistic.answer, correctAnswer)) {
+    <div class="statistic-content-header">
       <h1>
-        <i class="bi bi-check"></i>
+        {{ correctAnswer }}
       </h1>
+    </div>
+    <div class="statistic-content-inner">
+      @for(statistic of statistics; track statistic; let statsIndex = $index){
+      <div class="statistic-item-open">
+        <h2>
+          {{ statistic.answer }}
+        </h2>
+      </div>
       }
     </div>
-    }
   </div>
   }
 </div>
