@@ -9,7 +9,7 @@ import { SocketService } from '../../services/socket.service';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ToastService } from '../../toast.service';
-import { Room } from '../../interfaces/rooms.interface';
+import { Participant, Room } from '../../interfaces/rooms.interface';
 
 import QRCode from 'qrcode';
 import { environment } from '../../../environments/environment';
@@ -50,6 +50,8 @@ export class PlayComponent implements OnInit, AfterViewInit {
 
   statistics!: any;
   questionType: 'yes_no' | 'multiple_choice' | 'open' = 'open';
+
+  leaderboard!: Participant[];
 
   constructor(
     private socketService: SocketService,
@@ -229,6 +231,12 @@ export class PlayComponent implements OnInit, AfterViewInit {
             this.questionType = data.questionType;
             console.log(this.statistics);
           }
+          if (data.room.state == 'leaderboard') {
+            this.leaderboard = data.room.participants.sort(
+              (a: any, b: any) => b.score - a.score
+            );
+            console.log(this.leaderboard);
+          }
         }
       })
     );
@@ -321,9 +329,9 @@ export class PlayComponent implements OnInit, AfterViewInit {
           console.log('Show statistics event:', data);
           this.statistics = data.stats;
           this.getStatisticPercentages();
-          this.room.state = 'statistics';
           this.questionType = data.questionType;
           this.correctAnswer = data.correctAnswer;
+          this.room.state = 'statistics';
         }
       })
     );
@@ -332,6 +340,9 @@ export class PlayComponent implements OnInit, AfterViewInit {
       this.socketService.quizLeaderboard.subscribe((data) => {
         if (data) {
           console.log('Show leaderboard event:', data);
+          this.leaderboard = data.participants.sort(
+            (a: any, b: any) => b.score - a.score
+          );
           this.room.state = 'leaderboard';
         }
       })

@@ -437,9 +437,13 @@ export const reconnect = async (
 
     sanitizedRoom.participants.forEach((participant: any) => {
       participant.answers = undefined;
-      participant.correctAnswers = undefined;
-      participant.score = undefined;
     });
+    if (room.state !== "leaderboard") {
+      sanitizedRoom.participants.forEach((participant: any) => {
+        participant.correctAnswers = undefined;
+        participant.score = undefined;
+      });
+    }
 
     let answerStats = undefined;
     let correctAnswer = undefined;

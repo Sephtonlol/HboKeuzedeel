@@ -20,15 +20,21 @@
   @if(room && room.state == "question" &&( participantsAnswered ||
   participantsAnswered == 0)){
   <h3>{{ participantsAnswered }}/{{ room.participants?.length }} Answers</h3>
-  } @if(host){
-  <button type="button" class="btn btn-lg btn-primary" (click)="next()">
-    <span> Next </span>
-  </button>
-  }@else {
-  <button type="button" class="btn btn-lg btn-primary opacity">
-    <span> Next </span>
-  </button>
   }
+  <div class="right">
+    @if(host){
+    <button type="button" class="btn btn-lg btn-primary" (click)="next()">
+      <span> Next </span>
+    </button>
+    }@else {
+    <button type="button" class="btn btn-lg btn-primary opacity">
+      <span> Next </span>
+    </button>
+    }
+  </div>
+</div>
+<div class="quiz-progression">
+  <h3>{{ room.quizProgression }} / {{ quizLength }}</h3>
 </div>
 <div
   class="lobby"
@@ -157,6 +163,9 @@
 
 } @if(room && room.state == "statistics"){
 <div class="statistic-container">
+  <div class="question-header">
+    <h1>{{ question.name }}</h1>
+  </div>
   @if(questionType == "yes_no"|| questionType == "multiple_choice"){
 
   <div class="statistic-content-desktop">
@@ -272,5 +281,27 @@
   }
 </div>
 }@if(room && room.state == "leaderboard"){
-<h1>leaderboard</h1>
+<div class="leaderboard-container">
+  <div class="leaderboard-header"><h1>Leaderboard</h1></div>
+  @for(participant of leaderboard; track participant){
+  <div class="leaderboard-content">
+    <div class="leaderboard-item-outer">
+      <div class="leaderboard-item">
+        <div class="leaderboard-left">
+          <h3>
+            {{ $index + 1 }}.
+            {{ participant.name }}
+          </h3>
+        </div>
+        <h3>
+          <div class="leaderboard-right">
+            {{ participant.score }}
+          </div>
+        </h3>
+      </div>
+      <div class="divider"></div>
+    </div>
+  </div>
+  }
+</div>
 }
