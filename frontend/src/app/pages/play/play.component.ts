@@ -36,6 +36,7 @@ export class PlayComponent implements OnInit, AfterViewInit {
   errorMessage: string | null = null;
 
   locked: boolean = false;
+  showParticipantsValue: boolean = false;
 
   question!: Question;
   quizLength: number = 0;
@@ -168,6 +169,10 @@ export class PlayComponent implements OnInit, AfterViewInit {
     }));
   }
 
+  showParticipants() {
+    this.showParticipantsValue = !this.showParticipantsValue;
+  }
+
   ngAfterViewInit(): void {
     if (this.roomId && this.qrCanvas) this.generateQRCode();
   }
@@ -205,6 +210,7 @@ export class PlayComponent implements OnInit, AfterViewInit {
     this.subscriptions.push(
       this.socketService.roomUpdates.subscribe((data) => {
         if (data) {
+          this.quizLength = data.quizLength;
           console.log(data);
           this.room = data.room;
           if (data.host) this.host = data.host;
@@ -300,6 +306,7 @@ export class PlayComponent implements OnInit, AfterViewInit {
 
           if (data.question.type == 'multiple_choice')
             this.options = this.splitIntoPairs(data.question.answers.options);
+          this.showParticipantsValue = false;
         }
       })
     );
@@ -309,6 +316,12 @@ export class PlayComponent implements OnInit, AfterViewInit {
         if (data) {
           console.log('Question answered:', data);
           this.participantsAnswered += 1;
+          const participant = this.room.participants?.find(
+            (p) => p.name === data.name
+          );
+          if (participant) {
+            participant.totalAnswers += 1;
+          }
         }
       })
     );
@@ -319,6 +332,7 @@ export class PlayComponent implements OnInit, AfterViewInit {
           console.log('Show answer event:', data);
           this.checkAnswer(data);
           this.room.state = 'answer';
+          this.showParticipantsValue = false;
         }
       })
     );
@@ -332,6 +346,7 @@ export class PlayComponent implements OnInit, AfterViewInit {
           this.questionType = data.questionType;
           this.correctAnswer = data.correctAnswer;
           this.room.state = 'statistics';
+          this.showParticipantsValue = false;
         }
       })
     );
@@ -344,6 +359,7 @@ export class PlayComponent implements OnInit, AfterViewInit {
             (a: any, b: any) => b.score - a.score
           );
           this.room.state = 'leaderboard';
+          this.showParticipantsValue = false;
         }
       })
     );

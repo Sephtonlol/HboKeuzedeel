@@ -37,5 +37,7 @@ export interface Participant {
   token?: ObjectId;
   score: number;
   correctAnswers: number;
+  totalAnswers: number;
   team?: number;
+  answers?: string[];
 }

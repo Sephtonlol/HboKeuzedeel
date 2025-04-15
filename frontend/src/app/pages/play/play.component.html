@@ -1,3 +1,21 @@
+@if(showParticipantsValue){
+<div class="participants-container participants">
+  @for(participant of room.participants; track participant){
+  <div
+    class="participant"
+    [class.has-answered]="participant.totalAnswers == room.quizProgression"
+  >
+    <h3>
+      {{ participant.name }}
+    </h3>
+    @if(host && $index > 0){
+    <i class="bi bi-x kick-icon" (click)="kick(participant.name)"></i>
+    }
+  </div>
+  }
+</div>
+}
+
 <div class="hud">
   <div class="left">
     @if(room && room.quizProgression === 0){
@@ -19,7 +37,7 @@
   </div>
   @if(room && room.state == "question" &&( participantsAnswered ||
   participantsAnswered == 0)){
-  <h3>{{ participantsAnswered }}/{{ room.participants?.length }} Answers</h3>
+  <h3>{{ participantsAnswered }} / {{ room.participants?.length }} Answers</h3>
   }
   <div class="right">
     @if(host){
@@ -33,9 +51,27 @@
     }
   </div>
 </div>
-<div class="quiz-progression">
+@if(room.quizProgression > 0){
+<div
+  class="quiz-progression"
+  [class.display-none]="
+    room.state == 'statistics' || room.state == 'leaderboard'
+  "
+>
   <h3>{{ room.quizProgression }} / {{ quizLength }}</h3>
 </div>
+<div
+  class="show-participants"
+  [class.display-none]="
+    room.state == 'statistics' || room.state == 'leaderboard'
+  "
+  (click)="showParticipants()"
+>
+  <h1>
+    <i class="bi bi-people-fill"></i>
+  </h1>
+</div>
+}
 <div
   class="lobby"
   [style.display]="room && room.quizProgression === 0 ? 'flex' : 'none'"
@@ -66,7 +102,7 @@
         {{ participant.name }}
       </h3>
       @if(host && $index > 0){
-      <i class="bi bi-x-square kick-icon" (click)="kick(participant.name)"></i>
+      <i class="bi bi-x kick-icon" (click)="kick(participant.name)"></i>
       }
     </div>
     } }
