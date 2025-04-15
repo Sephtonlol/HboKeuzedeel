@@ -8,24 +8,7 @@
   <i class="bi bi-copy text-light" (click)="copy()"></i>
   }
 </div>
-<h6>{{ quiz.name }}</h6>
-<p>{{ quiz.createdBy || "unknown" }}</p>
-@if(showQuestions){
-<ul>
-  @for(question of quiz.questions; track question){
-  <p>
-    <li>
-      {{ question.name }}
-    </li>
-  </p>
-  }
-</ul>
-} @if(route == "/home"){
-<div class="btn-group">
-  <button class="btn btn-primary" (click)="toggleQuestions()">
-    Toggle Questions
-  </button>
-  <button class="btn btn-primary" (click)="selectQuiz()">Select Quiz</button>
-</div>
-}
+<h6 class="quiz-name">{{ quiz.name }}</h6>
+<p class="name">{{ quiz.createdBy || "unknown" }}</p>
+<p calss="description">{{ quiz.description || "No Description" }}</p>
 <div class="divider"></div>

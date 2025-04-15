@@ -1,10 +1,8 @@
 @if(showParticipantsValue){
-<div class="participants-container participants">
-  @for(participant of room.participants; track participant){
-  <div
-    class="participant"
-    [class.has-answered]="participant.totalAnswers == room.quizProgression"
-  >
+<div class="participants participants-container">
+  @if(room){ @if(room.mode?.type == "ffa" || room.mode?.type == "coop"){ @for(
+  participant of room.participants; track participant){
+  <div class="participant">
     <h3>
       {{ participant.name }}
     </h3>
@@ -12,7 +10,28 @@
     <i class="bi bi-x kick-icon" (click)="kick(participant.name)"></i>
     }
   </div>
-  }
+  } }@else if (room.mode?.type == "team"){@for (team of teamsArray; track team)
+  {
+  <div class="team">
+    <h4>Team {{ $index + 1 }}</h4>
+    <div class="team-participants">
+      @for (participant of team; track participant.name) {
+      <div class="participant">
+        <h3>
+          {{ participant.name }}
+        </h3>
+        @if(host && $index > 0){
+        <i class="bi bi-x kick-icon" (click)="kick(participant.name)"></i>
+        }
+      </div>
+      } @if(team.length < 1){
+      <div class="participant">
+        <h3>No one</h3>
+      </div>
+      }
+    </div>
+  </div>
+  } } }
 </div>
 }
 
@@ -41,7 +60,14 @@
   }
   <div class="right">
     @if(host){
-    <button type="button" class="btn btn-lg btn-primary" (click)="next()">
+    <button
+      type="button"
+      class="btn btn-lg btn-primary"
+      (click)="next()"
+      [class.disabled]="
+        room.state == 'leaderboard' && room.quizProgression == quizLength
+      "
+    >
       <span> Next </span>
     </button>
     }@else {
@@ -51,7 +77,7 @@
     }
   </div>
 </div>
-@if(room.quizProgression > 0){
+@if(room && room.quizProgression > 0){
 <div
   class="quiz-progression"
   [class.display-none]="
@@ -96,7 +122,8 @@
   </div>
 
   <div class="participants">
-    @if(room){ @for( participant of room.participants; track participant){
+    @if(room){ @if(room.mode?.type == "ffa" || room.mode?.type == "coop"){ @for(
+    participant of room.participants; track participant){
     <div class="participant">
       <h3>
         {{ participant.name }}
@@ -105,7 +132,28 @@
       <i class="bi bi-x kick-icon" (click)="kick(participant.name)"></i>
       }
     </div>
-    } }
+    } }@else if (room.mode?.type == "team"){@for (team of teamsArray; track
+    team) {
+    <div class="team">
+      <h4>Team {{ $index + 1 }}</h4>
+      <div class="team-participants">
+        @for (participant of team; track participant.name) {
+        <div class="participant">
+          <h3>
+            {{ participant.name }}
+          </h3>
+          @if(host && $index > 0){
+          <i class="bi bi-x kick-icon" (click)="kick(participant.name)"></i>
+          }
+        </div>
+        } @if(team.length < 1){
+        <div class="participant">
+          <h3>No one</h3>
+        </div>
+        }
+      </div>
+    </div>
+    } } }
   </div>
 </div>
 @if(room && room.quizProgression > 0 && (room.state == "question" ||
@@ -330,7 +378,8 @@
 }@if(room && room.state == "leaderboard"){
 <div class="leaderboard-container">
   <div class="leaderboard-header"><h1>Leaderboard</h1></div>
-  @for(participant of leaderboard; track participant){ @if($index < 9){
+  @if(room.mode?.type == "ffa" ){ @for(participant of leaderboard; track
+  participant){ @if($index < 9){
 
   <div class="leaderboard-content">
     <div class="leaderboard-item-outer">
@@ -349,6 +398,31 @@
       </div>
       <div class="divider"></div>
     </div>
+  </div>
+  } } }@else if(room.mode?.type == "team"){
+  <div class="leaderboard-content leaderboard-content-team">
+    @for (team of teamsArray; track team) { @if ($index < 9) {
+    <div class="leaderboard-item-outer">
+      <div class="leaderboard-item">
+        <div class="leaderboard-left">
+          <h3>Team {{ $index + 1 }}</h3>
+          @for (member of team; track member) {
+          <p>{{ member.name }} ({{ member.score }})</p>
+          }
+        </div>
+        <h3 class="teams-score">
+          <div class="leaderboard-right">
+            {{ getTeamScore(team) }}
+          </div>
+        </h3>
+      </div>
+      <div class="divider"></div>
+    </div>
+    } }
+  </div>
+  }@else { @if(room && room.participants){
+  <div class="leaderboard-content">
+    <h1>{{ getTotalScore() }}</h1>
   </div>
   } }
 </div>

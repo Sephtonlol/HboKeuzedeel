@@ -54,6 +54,8 @@ export class PlayComponent implements OnInit, AfterViewInit {
 
   leaderboard!: Participant[];
 
+  teamsArray!: Participant[][];
+
   constructor(
     private socketService: SocketService,
     private router: Router,
@@ -169,6 +171,14 @@ export class PlayComponent implements OnInit, AfterViewInit {
     }));
   }
 
+  getTeamScore(team: Participant[]): number {
+    return team.reduce((acc, participant) => acc + participant.score, 0);
+  }
+
+  getTotalScore(): number {
+    return this.leaderboard.reduce((acc, p) => acc + p.score, 0);
+  }
+
   showParticipants() {
     this.showParticipantsValue = !this.showParticipantsValue;
   }
@@ -242,6 +252,22 @@ export class PlayComponent implements OnInit, AfterViewInit {
               (a: any, b: any) => b.score - a.score
             );
             console.log(this.leaderboard);
+          }
+          if (this.room.mode?.type == 'team') {
+            const numberOfTeams = this.room.mode.teams ?? 0;
+
+            const teamsArray: Participant[][] = Array.from(
+              { length: numberOfTeams },
+              () => []
+            );
+
+            this.room.participants?.forEach((participant) => {
+              if (typeof participant.team === 'number') {
+                teamsArray[participant.team]?.push(participant);
+              }
+            });
+
+            this.teamsArray = teamsArray;
           }
         }
       })

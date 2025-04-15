@@ -3,7 +3,6 @@ export const cleanString = (str: string) =>
 
 export const compare = (str1: any, str2: any): boolean => {
   if (cleanString(str1.toString()) !== cleanString(str2.toString())) {
-    console.log(cleanString(str1.toString()), cleanString(str2.toString()));
     return false;
   }
   return true;

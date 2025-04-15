@@ -111,23 +111,18 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const verifyToken = async (
-  authHeader: string | undefined,
-  get: boolean = false
+  authHeader: string | undefined
 ): Promise<any> => {
   try {
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       throw new Error("Authorization header is missing or invalid.");
     }
-
     const token = authHeader.split(" ")[1];
-    const db = await connectToDatabase();
 
+    const db = await connectToDatabase();
     const result = await db.collection(userCollection).findOne({
       "user.token": token,
     });
-    if (get) {
-      return token;
-    }
 
     if (!result) {
       return false;
@@ -138,6 +133,15 @@ export const verifyToken = async (
     console.error("Error during token verification:", error);
     return false;
   }
+};
+
+export const extractToken = (authHeader: string | undefined): string | null => {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return null;
+  }
+
+  const token = authHeader.split(" ")[1];
+  return token || null;
 };
 
 export const user = async (req: Request, res: Response) => {

@@ -344,7 +344,7 @@ export const answerQuestion = async (
 
     if (isCorrect) {
       participant.correctAnswers += 1;
-      participant.score += 5;
+      participant.score += 125;
     }
     await db
       .collection<Room>("rooms")

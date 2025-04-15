@@ -4,7 +4,7 @@ import { Quiz } from "../../interfaces/quiz.interface";
 import { ObjectId } from "mongodb";
 import { checkObjectId, checkString } from "../utils/types.utils";
 import { sanitizeQuiz, sanitizeQuizzes } from "../utils/sanitize.utils";
-import { verifyToken } from "./account.controller";
+import { extractToken, verifyToken } from "./account.controller";
 
 const quizCollection = "quizzes";
 const userCollection = "users";
@@ -102,10 +102,9 @@ export const createQuiz = async (req: Request, res: Response) => {
     }
     const createdAt = new Date();
     const resultUser = await db.collection(userCollection).findOne({
-      "user.token": verifyToken(req.headers.authorization, true),
+      "user.token": extractToken(req.headers.authorization),
     });
-
-    const createdBy = resultUser?.username;
+    const createdBy = resultUser?.user.username;
 
     const quiz: Quiz = { name, description, createdAt, createdBy, questions };
 

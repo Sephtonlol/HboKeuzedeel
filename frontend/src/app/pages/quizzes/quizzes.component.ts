@@ -35,6 +35,7 @@ export class QuizzesComponent implements OnInit {
       this.toastService.show({ error: 'No quizzes found.' });
   }
   async getQuizzes() {
+    this.searchInput == '';
     this.page = this.route.snapshot.paramMap.get('page');
     if (!this.page || Number(this.page) < 0) {
       this.router.navigate(['/quizzes', 1]);

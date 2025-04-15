@@ -67,7 +67,6 @@ export const create = async (
       mode.type === "team" &&
       (typeof mode.teams !== "number" || mode.teams < 2 || mode.teams > 10)
     ) {
-      console.log(mode.teams);
       return socket.emit("user:error", {
         error: "Mode teams must be a number between 2 & 10",
       });
