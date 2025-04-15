@@ -1,5 +1,9 @@
 @for(room of rooms; track room._id){
-<app-room [room]="room" [routerLink]="['/join', room.roomId]" />
+<app-room
+  [room]="room"
+  [routerLink]="['/join', room.roomId]"
+  [class.disabled]="room.locked"
+/>
 } @if( rooms && rooms.length < 1){
 <div class="no-rooms">
   <h1>Will you be the first to host?</h1>

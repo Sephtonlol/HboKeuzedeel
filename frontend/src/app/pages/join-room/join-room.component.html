@@ -36,7 +36,9 @@
   </div>
 
   <div class="teams">
-    @if(room.mode?.type == "team"){ @for (team of teamsArray; track team) {
+    @if(room.locked){
+    <i class="bi bi-lock-fill"></i>
+    } @if(room.mode?.type == "team"){ @for (team of teamsArray; track team) {
     <div class="team">
       <h4>Team {{ $index + 1 }}</h4>
       <div class="participants">

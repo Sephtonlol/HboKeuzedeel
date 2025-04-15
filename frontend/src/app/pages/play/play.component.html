@@ -24,7 +24,7 @@
       type="button"
       class="btn btn-lg btn-secondary"
       (click)="lock()"
-      [disabled]="!host"
+      [class.disabled]="!host"
     >
       @if(locked){ <i class="bi bi-lock-fill"></i>} @else {
       <i class="bi bi-unlock-fill"></i>
