@@ -9,7 +9,7 @@
         placeholder="Nickname"
         [(ngModel)]="username"
       />
-      @if(room.mode?.type == "team"){
+      @if(room && room.mode?.type == "team"){
 
       <select
         class="form-control"
@@ -36,9 +36,10 @@
   </div>
 
   <div class="teams">
-    @if(room.locked){
+    @if(room && room.locked){
     <i class="bi bi-lock-fill"></i>
-    } @if(room.mode?.type == "team"){ @for (team of teamsArray; track team) {
+    } @if(room && room.mode?.type == "team"){ @for (team of teamsArray; track
+    team) {
     <div class="team">
       <h4>Team {{ $index + 1 }}</h4>
       <div class="participants">
@@ -53,10 +54,11 @@
         }
       </div>
     </div>
-    } }@else { @for(participant of room.participants; track participant){
+    } }@else { @if(room && room.participants){ @for(participant of
+    room.participants; track participant){
     <div class="participant">
       <span>{{ participant.name }}</span>
     </div>
-    } }
+    } } }
   </div>
 </div>

@@ -12,6 +12,7 @@ const roomCollection = "rooms";
 
 export const getRoom = async (req: Request, res: Response) => {
   const roomId = req.query.roomId;
+  const quiz = req.query.quiz;
 
   try {
     const db = await connectToDatabase();
@@ -29,7 +30,8 @@ export const getRoom = async (req: Request, res: Response) => {
       if (!fetchedRoom.quiz)
         return res.status(404).json({ error: "No quiz found in this room." });
 
-      fetchedRoom.quiz = sanitizeQuiz(fetchedRoom.quiz);
+      const quizBool = quiz === "true";
+      fetchedRoom.quiz = quizBool ? sanitizeQuiz(fetchedRoom.quiz) : undefined;
 
       return res.status(200).json(sanitizeRoom(fetchedRoom));
     }
