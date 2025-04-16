@@ -139,7 +139,7 @@
       }
     </div>
     } }@else if (room.mode?.type == "team"){@for (team of teamsArray; track
-    team) {
+    team; let roomIndex = $index) {
     <div class="team">
       <h4>Team {{ $index + 1 }}</h4>
       <div class="team-participants">
@@ -148,7 +148,7 @@
           <h3>
             {{ participant.name }}
           </h3>
-          @if(host && $index > 0){
+          @if(host && roomIndex > 0){
           <i class="bi bi-x kick-icon" (click)="kick(participant.name)"></i>
           }
         </div>

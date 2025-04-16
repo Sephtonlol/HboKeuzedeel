@@ -172,7 +172,7 @@ export class PlayComponent implements OnInit, AfterViewInit {
   }
 
   getTeamScore(team: Participant[]): number {
-    return team.reduce((acc, participant) => acc + participant.score, 0);
+    return team.reduce((acc, participant) => acc + participant.score, 0) || 0;
   }
 
   getTotalScore(): number {
@@ -220,8 +220,7 @@ export class PlayComponent implements OnInit, AfterViewInit {
     this.subscriptions.push(
       this.socketService.roomUpdates.subscribe((data) => {
         if (data) {
-          this.quizLength = data.quizLength;
-          console.log(data);
+          if (data.quizLength) this.quizLength = data.quizLength;
           this.room = data.room;
           if (data.host) this.host = data.host;
           this.locked = this.room.locked;
@@ -388,6 +387,19 @@ export class PlayComponent implements OnInit, AfterViewInit {
           );
           this.room.state = 'leaderboard';
           this.showParticipantsValue = false;
+
+          const teamsArray: Participant[][] = Array.from(
+            { length: this.room.mode?.teams || 0 },
+            () => []
+          );
+
+          this.room.participants?.forEach((participant) => {
+            if (typeof participant.team === 'number') {
+              teamsArray[participant.team]?.push(participant);
+            }
+          });
+
+          this.teamsArray = teamsArray;
         }
       })
     );

@@ -359,7 +359,7 @@ h3 {
   text-align: center;
 }
 .leaderboard-content-team {
-  width: fit-content;
+  width: 100%;
 }
 @media (max-width: 992px) {
   .incorrect-icon {
