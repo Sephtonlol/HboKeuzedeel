@@ -39,7 +39,7 @@ export class PlayComponent implements OnInit, AfterViewInit {
   showParticipantsValue: boolean = false;
 
   question!: Question;
-  quizLength: number = 0;
+  quizLength: number = 10;
 
   options!: string[][];
 
