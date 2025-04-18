@@ -21,6 +21,6 @@ const io = new Server(server, {
 
 socketRoutes(io);
 
-server.listen(PORT, () => {
-  console.log("Server listening on PORT", PORT);
+server.listen(PORT, () => { 
+  console.log(`Server listening on PORT ${PORT}`);
 });

@@ -5,6 +5,7 @@ import cors from "cors";
 import router from "./routes/app.routes";
 import { checkEnvVars } from "./utils/env.utils";
 
+
 const PORT = process.env.APP_PORT;
 const app = express();
 
@@ -12,9 +13,12 @@ checkEnvVars(true);
 
 app.use(
   cors({
-    origin: process.env.APP_BASE_URL, // Frontend rest-api
+    origin: process.env.APP_BASE_URL,
+    credentials: true, // allow cookies/session
   })
 );
+
+
 
 app.use(
   session({
